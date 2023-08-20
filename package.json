@@ -1,0 +1,28 @@
+{
+  "name": "screeps-main",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "push": "grunt screeps"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Codeup-Screeps/screeps-merrellj.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Codeup-Screeps/screeps-merrellj/issues"
+  },
+  "homepage": "https://github.com/Codeup-Screeps/screeps-merrellj#readme",
+  "dependencies": {
+    "grunt-contrib-clean": "^2.0.1",
+    "grunt-contrib-concat": "^2.1.0",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-file-append": "^0.0.7",
+    "grunt-jsbeautifier": "^0.2.13",
+    "grunt-screeps": "^1.5.0"
+  }
+}

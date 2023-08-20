@@ -1,4 +1,4 @@
-const CreepBase = require("CreepBase");
+const CreepBase = require("./CreepBase");
 
 class Builder extends CreepBase {
   work() {

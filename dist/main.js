@@ -1,10 +1,10 @@
-const Harvester = require("roles/Harvester");
-const Upgrader = require("roles/Upgrader");
-const Builder = require("roles/Builder");
+const Harvester = require("./roles/Harvester");
+const Upgrader = require("./roles/Upgrader");
+const Builder = require("./roles/Builder");
 const {
   handleStuckCreeps,
   getDesiredCounts,
-} = require("utilities/helperFunctions");
+} = require("./utilities/helperFunctions");
 
 const roles = {
   harvester: Harvester,
