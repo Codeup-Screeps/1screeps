@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/Codeup-Screeps/screeps-merrellj#readme",
   "dependencies": {
+    "@types/screeps": "^3.3.3",
     "grunt-contrib-clean": "^2.0.1",
     "grunt-contrib-concat": "^2.1.0",
     "grunt-contrib-copy": "^1.0.0",
