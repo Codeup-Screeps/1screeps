@@ -1,48 +1,48 @@
-class Builder {
+const CreepBase = require("role.creepbase");
+class Builder extends CreepBase {
   /** @param {Creep} creep **/
-  run(creep) {
+  constructor(creep) {
+    super(creep);
+  }
+  run() {
     // Switching between modes
-    if (creep.memory.building && creep.store[RESOURCE_ENERGY] === 0) {
-      creep.memory.building = false;
-      creep.say("🔄 collect");
+    if (this.creep.memory.building && this.creep.store[RESOURCE_ENERGY] === 0) {
+      this.creep.memory.building = false;
+      this.creep.say("🔄 collect");
     }
-    if (!creep.memory.building && creep.store.getFreeCapacity() === 0) {
-      creep.memory.building = true;
-      creep.say("🚧 build");
+    if (
+      !this.creep.memory.building &&
+      this.creep.store.getFreeCapacity() === 0
+    ) {
+      this.creep.memory.building = true;
+      this.creep.say("🚧 build");
     }
 
-    if (creep.memory.building) {
+    if (this.creep.memory.building) {
       // Simplified building logic
-      let targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+      let targets = this.creep.room.find(FIND_CONSTRUCTION_SITES);
       if (targets.length) {
-        if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-          creep.moveTo(targets[0], {
+        if (this.creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
+          this.creep.moveTo(targets[0], {
             visualizePathStyle: { stroke: "#ffffff" },
           });
         }
       } else {
         // For debugging: If no construction sites, output a message to the console
-        console.log("Builder found no construction sites.");
-      }
-    } else {
-      // First, try to collect dropped energy
-      const droppedEnergy = creep.room.find(FIND_DROPPED_RESOURCES, {
-        filter: (resource) => resource.resourceType == RESOURCE_ENERGY,
-      });
-
-      const closestDroppedEnergy = creep.pos.findClosestByRange(droppedEnergy);
-
-      if (closestDroppedEnergy) {
-        if (creep.pickup(closestDroppedEnergy) === ERR_NOT_IN_RANGE) {
-          creep.moveTo(closestDroppedEnergy, {
-            visualizePathStyle: { stroke: "#ffaa00" },
+        this.creep.say("🚧 upgrade");
+        if (
+          this.creep.upgradeController(this.creep.room.controller) ==
+          ERR_NOT_IN_RANGE
+        ) {
+          // Move to it
+          this.creep.moveTo(this.creep.room.controller, {
+            visualizePathStyle: { stroke: "#ffffff" },
           });
-          return; // Important to exit early if we found dropped energy
         }
       }
-
-      // If no dropped energy, try to withdraw from containers or storage
-      const containers = creep.room.find(FIND_STRUCTURES, {
+    } else {
+      // try to withdraw from containers or storage
+      const containers = this.creep.room.find(FIND_STRUCTURES, {
         filter: (s) =>
           (s.structureType == STRUCTURE_CONTAINER ||
             s.structureType == STRUCTURE_STORAGE) &&
@@ -50,21 +50,33 @@ class Builder {
       });
 
       if (containers.length) {
-        const closestContainer = creep.pos.findClosestByPath(containers);
+        const closestContainer = this.creep.pos.findClosestByPath(containers);
         if (
-          creep.withdraw(closestContainer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE
+          this.creep.withdraw(closestContainer, RESOURCE_ENERGY) ===
+          ERR_NOT_IN_RANGE
         ) {
-          creep.moveTo(closestContainer, {
+          this.creep.moveTo(closestContainer, {
             visualizePathStyle: { stroke: "#ffaa00" },
           });
           return; // Exit early if we're moving to a container or storage
         }
       }
 
-      // If nothing else, then harvest from source (least efficient)
-      const sources = creep.room.find(FIND_SOURCES);
-      if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(sources[0], { visualizePathStyle: { stroke: "#ffaa00" } });
+      // try to collect dropped energy
+      const droppedEnergy = this.creep.room.find(FIND_DROPPED_RESOURCES, {
+        filter: (resource) => resource.resourceType == RESOURCE_ENERGY,
+      });
+
+      const closestDroppedEnergy =
+        this.creep.pos.findClosestByRange(droppedEnergy);
+
+      if (closestDroppedEnergy) {
+        if (this.creep.pickup(closestDroppedEnergy) === ERR_NOT_IN_RANGE) {
+          this.creep.moveTo(closestDroppedEnergy, {
+            visualizePathStyle: { stroke: "#ffaa00" },
+          });
+          return; // Important to exit early if we found dropped energy
+        }
       }
     }
   }
