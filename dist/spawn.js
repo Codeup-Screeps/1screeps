@@ -16,7 +16,7 @@ class SpawnController {
   }
   spawnNewCreeps() {
     // If there aren't enough harvesters
-    if (this.harvesters < 4) {
+    if (this.harvesters < 3) {
       // Spawn a new one
 
       var newName = "Harvester" + Game.time;
@@ -52,7 +52,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough repairers
-    else if (this.repairers < 2) {
+    else if (this.repairers < 3) {
       // Spawn a new one
       var newName = "Repairer" + Game.time;
       this.spawn.spawnCreep(this.creepLoadout("repairer"), newName, {

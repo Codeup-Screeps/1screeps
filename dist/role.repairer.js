@@ -32,6 +32,19 @@ class Repairer extends CreepBase {
       structuresToRepair.sort((a, b) => a.hits - b.hits); // Repair the most damaged first
 
       if (structuresToRepair.length > 0) {
+        // Non road structures
+        const nonRoadStructuresToRepair = structuresToRepair.filter(
+          (structure) => structure.structureType != STRUCTURE_ROAD
+        );
+        // Non road structures with less than half hits
+        const nonRoadStructuresToRepairLessThanHalf =
+          nonRoadStructuresToRepair.filter(
+            (structure) => structure.hits < structure.hitsMax / 2
+          );
+        if (nonRoadStructuresToRepairLessThanHalf.length > 0) {
+          structuresToRepair = nonRoadStructuresToRepairLessThanHalf;
+        }
+
         if (this.creep.repair(structuresToRepair[0]) === ERR_NOT_IN_RANGE) {
           this.creep.moveTo(structuresToRepair[0], {
             visualizePathStyle: { stroke: "#ffaa00" },

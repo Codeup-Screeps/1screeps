@@ -67,6 +67,27 @@ class RoleHauler extends CreepBase {
         }
         return;
       }
+      // Find towers in the room that aren't full
+      const towers = this.creep.room.find(FIND_STRUCTURES, {
+        filter: (structure) =>
+          structure.structureType == STRUCTURE_TOWER &&
+          structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
+      });
+      if (towers.length > 0) {
+        // Find the closest tower
+        const closestTower = this.creep.pos.findClosestByRange(towers);
+
+        // Try to transfer energy to the tower. If it's not in range
+        if (
+          this.creep.transfer(closestTower, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE
+        ) {
+          // Move to it
+          this.creep.moveTo(closestTower, {
+            visualizePathStyle: { stroke: "#ffaa00" },
+          });
+        }
+        return;
+      }
       // Find containers in the room that aren't full
       const containers = this.creep.room.find(FIND_STRUCTURES, {
         filter: (structure) =>

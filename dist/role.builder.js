@@ -28,8 +28,7 @@ class Builder extends CreepBase {
           });
         }
       } else {
-        // For debugging: If no construction sites, output a message to the console
-        this.creep.say("🚧 upgrade");
+        // If no construction sites, act as upgrader
         if (
           this.creep.upgradeController(this.creep.room.controller) ==
           ERR_NOT_IN_RANGE
