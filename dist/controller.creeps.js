@@ -1,3 +1,9 @@
+/* 
+This is an idea to make a controller for all creeps, to better manage them
+down the road. It's not currently in use. Future ideas:
+- Have the controller manage the creeps through persistent memory
+- Evaluate the room and assign tasks to creeps based on the room's needs
+*/
 class CreepsController {
   constructor(spawn) {
     this.spawn = spawn;
