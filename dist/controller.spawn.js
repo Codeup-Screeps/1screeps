@@ -8,7 +8,7 @@ class SpawnController {
     this.upgraders = this.countCreeps("upgrader");
     this.builders = this.countCreeps("builder");
     this.repairers = this.countCreeps("repairer");
-    this.energySources = this.spawn.room.find(FIND_SOURCES).length;
+    this.sourceCount = this.spawn.room.find(FIND_SOURCES).length;
     //count extensions
     this.extensions = this.spawn.room.find(FIND_STRUCTURES, {
       filter: (structure) => structure.structureType == STRUCTURE_EXTENSION,
@@ -30,7 +30,7 @@ class SpawnController {
   }
   spawnNewCreeps() {
     // If there aren't enough harvesters
-    if (this.harvesters < this.energySources) {
+    if (this.harvesters < this.sourceCount) {
       // Spawn a new one
 
       var newName = "Harvester" + Game.time;
@@ -39,7 +39,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough haulers
-    else if (this.haulers < this.energySources * 2) {
+    else if (this.haulers < this.sourceCount * 2) {
       // Spawn a new one
 
       var newName = "Hauler" + Game.time;
