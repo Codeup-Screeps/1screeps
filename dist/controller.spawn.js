@@ -3,17 +3,26 @@ const CreepsController = require("./controller.creeps");
 class SpawnController {
   constructor(spawn) {
     this.spawn = spawn;
+    // get a count of all creep roles
     this.harvesters = this.countCreeps("harvester");
     this.haulers = this.countCreeps("hauler");
     this.upgraders = this.countCreeps("upgrader");
     this.builders = this.countCreeps("builder");
     this.repairers = this.countCreeps("repairer");
+    // count the amount of sources in the room as part of logic
+    // for creep spawning
     this.sourceCount = this.spawn.room.find(FIND_SOURCES).length;
     //count extensions
     this.extensions = this.spawn.room.find(FIND_STRUCTURES, {
       filter: (structure) => structure.structureType == STRUCTURE_EXTENSION,
     }).length;
+    // wait on energy to create larger creeps
     this.minBuild = 300 + 50 * this.extensions;
+    // in the case of a base meltdown, let spawn create smaller creeps
+    if (this.harvesters === 0 || this.haulers === 0) {
+      this.minBuild = 300;
+    }
+    // this creeps controller is currently not in use, later development planned
     this.creepsController = new CreepsController(spawn);
   }
   run() {
@@ -48,7 +57,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough upgraders
-    else if (this.upgraders < 3) {
+    else if (this.upgraders < 1) {
       // Spawn a new one
 
       var newName = "Upgrader" + Game.time;

@@ -30,7 +30,7 @@ class RoleUpgrader extends CreepBase {
     // If the creep is upgrading
     if (this.creep.memory.upgrading) {
       // Move to and upgrade the controller
-      this.performUpgradeController();
+      this.performUpgradeRole();
     } else {
       // try to withdraw from containers or storage
       if (this.collectFromContainers()) {
