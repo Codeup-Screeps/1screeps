@@ -8,7 +8,7 @@ class CreepsController {
   constructor(spawn) {
     this.spawn = spawn;
     this.room = spawn.room;
-    this.sources = this.countEnergySources();
+    this.sources = this.getEnergySources();
     this.creeps = {
       harvesters: this.getCreepsByType("harvester"),
       haulers: this.getCreepsByType("hauler"),
@@ -20,7 +20,7 @@ class CreepsController {
   run() {
     return;
   }
-  countEnergySources() {
+  getEnergySources() {
     return this.room.find(FIND_SOURCES);
   }
   getCreepsByType(type) {
