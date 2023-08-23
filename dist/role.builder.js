@@ -3,7 +3,7 @@ class Builder extends CreepBase {
   /** @param {Creep} creep **/
   constructor(creep) {
     super(creep);
-    this.repairWalls = true;
+    this.repairWalls = false;
   }
   run() {
     // Switching between modes
