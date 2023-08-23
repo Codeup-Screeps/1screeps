@@ -55,7 +55,7 @@ class RoleHarvester extends CreepBase {
           }
         }
       }
-      return settledHarvesters < 2; // Choose sources with fewer than two settled harvesters
+      return settledHarvesters < 1; // Choose sources with fewer than this amount of settled harvesters
     });
 
     // Find the closest available source to the creep

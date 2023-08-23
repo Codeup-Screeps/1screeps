@@ -1,3 +1,5 @@
+const CreepsController = require("./controller.creeps");
+
 class SpawnController {
   constructor(spawn) {
     this.spawn = spawn;
@@ -6,17 +8,29 @@ class SpawnController {
     this.upgraders = this.countCreeps("upgrader");
     this.builders = this.countCreeps("builder");
     this.repairers = this.countCreeps("repairer");
+    this.energySources = this.spawn.room.find(FIND_SOURCES).length;
+    //count extensions
+    this.extensions = this.spawn.room.find(FIND_STRUCTURES, {
+      filter: (structure) => structure.structureType == STRUCTURE_EXTENSION,
+    }).length;
+    this.minBuild = 300 + 50 * this.extensions;
+    this.creepsController = new CreepsController(spawn);
   }
   run() {
+    let availableEnergy = parseFloat(this.spawn.room.energyAvailable);
+    if (availableEnergy < this.minBuild) {
+      return;
+    }
     this.spawnNewCreeps();
     this.announceNewCreeps();
+    this.creepsController.run();
   }
   countCreeps(type) {
     return _.filter(Game.creeps, (creep) => creep.memory.role == type).length;
   }
   spawnNewCreeps() {
     // If there aren't enough harvesters
-    if (this.harvesters < 3) {
+    if (this.harvesters < this.energySources) {
       // Spawn a new one
 
       var newName = "Harvester" + Game.time;
@@ -25,7 +39,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough haulers
-    else if (this.haulers < 3) {
+    else if (this.haulers < this.energySources * 2) {
       // Spawn a new one
 
       var newName = "Hauler" + Game.time;

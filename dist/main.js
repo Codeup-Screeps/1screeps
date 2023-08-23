@@ -4,7 +4,7 @@ const RoleUpgrader = require("role.upgrader");
 const RoleHauler = require("role.hauler");
 const RoleBuilder = require("role.builder");
 const RoleRepairer = require("role.repairer");
-const SpawnController = require("spawn");
+const SpawnController = require("controller.spawn");
 
 module.exports.loop = function () {
   // Loop through each creep's name in Memory.creeps

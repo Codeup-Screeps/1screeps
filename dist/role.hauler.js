@@ -7,8 +7,20 @@ class RoleHauler extends CreepBase {
     super(creep);
   }
   run() {
-    // If the hauler isn't full
-    if (this.creep.store.getFreeCapacity() > 0) {
+    // Switching between modes
+    if (this.creep.memory.hauling && this.creep.store[RESOURCE_ENERGY] === 0) {
+      this.creep.memory.hauling = false;
+      this.creep.say("🔄 collect");
+    }
+    if (
+      !this.creep.memory.hauling &&
+      this.creep.store.getFreeCapacity() === 0
+    ) {
+      this.creep.memory.hauling = true;
+      this.creep.say("📦 haul");
+    }
+    // If collecting
+    if (!this.creep.memory.hauling) {
       // Find energy on the ground
       const droppedEnergy = this.creep.room.find(FIND_DROPPED_RESOURCES, {
         filter: (resource) => resource.resourceType == RESOURCE_ENERGY,
