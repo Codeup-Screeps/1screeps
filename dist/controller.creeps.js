@@ -18,7 +18,25 @@ class CreepsController {
     };
   }
   run() {
+    this.assignHaulerSource();
     return;
+  }
+  assignHaulerSource() {
+    // assign a designated source to each hauler in memory
+    // if the hauler already has a source, leave it alone
+    // otherwise, assign it to the source with the fewest haulers
+    this.creeps.haulers.forEach((hauler) => {
+      if (hauler.memory.source) {
+        return;
+      }
+      let source = _.min(this.sources, (source) => {
+        return _.filter(
+          this.creeps.haulers,
+          (creep) => creep.memory.source == source.id
+        ).length;
+      });
+      hauler.memory.source = source.id;
+    });
   }
   getEnergySources() {
     return this.room.find(FIND_SOURCES);

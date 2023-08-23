@@ -19,10 +19,9 @@ class SpawnController {
     // wait on energy to create larger creeps
     this.minBuild = 300 + 50 * this.extensions;
     // in the case of a base meltdown, let spawn create smaller creeps
-    if (this.harvesters === 0 || this.haulers === 0) {
+    if (this.harvesters === 0 || this.haulers < 2) {
       this.minBuild = 300;
     }
-    // this creeps controller is currently not in use, later development planned
     this.creepsController = new CreepsController(spawn);
   }
   run() {
@@ -56,15 +55,6 @@ class SpawnController {
         memory: { role: "hauler" },
       });
     }
-    // Otherwise if there aren't enough upgraders
-    else if (this.upgraders < 1) {
-      // Spawn a new one
-
-      var newName = "Upgrader" + Game.time;
-      this.spawn.spawnCreep(this.creepLoadout("upgrader"), newName, {
-        memory: { role: "upgrader", upgrading: false },
-      });
-    }
     // Otherwise if there aren't enough builders
     else if (this.builders < 3) {
       // Spawn a new one
@@ -80,6 +70,15 @@ class SpawnController {
       var newName = "Repairer" + Game.time;
       this.spawn.spawnCreep(this.creepLoadout("repairer"), newName, {
         memory: { role: "repairer", repairing: false },
+      });
+    }
+    // Otherwise if there aren't enough upgraders
+    else if (this.upgraders < 1) {
+      // Spawn a new one
+
+      var newName = "Upgrader" + Game.time;
+      this.spawn.spawnCreep(this.creepLoadout("upgrader"), newName, {
+        memory: { role: "upgrader", upgrading: false },
       });
     }
   }

@@ -6,6 +6,9 @@ const RoleBuilder = require("role.builder");
 const RoleRepairer = require("role.repairer");
 const SpawnController = require("controller.spawn");
 
+// Import pathing management
+// const Pathing = require("pathing");
+
 module.exports.loop = function () {
   // Loop through each creep's name in Memory.creeps
   for (var creepName in Memory.creeps) {
@@ -52,5 +55,7 @@ module.exports.loop = function () {
       new RoleRepairer(creep).run();
       continue;
     }
+    // running all creep moves
+    // Pathing.runMoves();
   }
 };

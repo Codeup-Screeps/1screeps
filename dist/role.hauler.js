@@ -21,20 +21,30 @@ class RoleHauler extends CreepBase {
     }
     // If collecting
     if (!this.creep.memory.hauling) {
-      // Find energy on the ground
+      // move toward creep.memory.source
+      const source = Game.getObjectById(this.creep.memory.source);
+      // if not within 10 range of source
+      if (this.creep.pos.getRangeTo(source) > 3) {
+        // move toward source
+        this.creep.moveTo(source, {
+          visualizePathStyle: { stroke: "#ffaa00" },
+          reusePath: 1,
+        });
+        return;
+      }
+      // Get all the dropped energy
       const droppedEnergy = this.creep.room.find(FIND_DROPPED_RESOURCES, {
         filter: (resource) => resource.resourceType == RESOURCE_ENERGY,
       });
-
-      // Find the closest energy on the ground
+      // Find the closest dropped energy
       const closestDroppedEnergy =
         this.creep.pos.findClosestByRange(droppedEnergy);
-
       // Try to pickup the energy. If it's not in range
       if (this.creep.pickup(closestDroppedEnergy) == ERR_NOT_IN_RANGE) {
         // Move to it
         this.creep.moveTo(closestDroppedEnergy, {
           visualizePathStyle: { stroke: "#ffaa00" },
+          reusePath: 1,
         });
       }
     } else {
@@ -53,6 +63,7 @@ class RoleHauler extends CreepBase {
           // Move to it
           this.creep.moveTo(closestSpawn, {
             visualizePathStyle: { stroke: "#ffaa00" },
+            reusePath: 1,
           });
         }
         return;
@@ -75,6 +86,7 @@ class RoleHauler extends CreepBase {
           // Move to it
           this.creep.moveTo(closestExtension, {
             visualizePathStyle: { stroke: "#ffaa00" },
+            reusePath: 1,
           });
         }
         return;
@@ -96,6 +108,7 @@ class RoleHauler extends CreepBase {
           // Move to it
           this.creep.moveTo(closestTower, {
             visualizePathStyle: { stroke: "#ffaa00" },
+            reusePath: 1,
           });
         }
         return;
@@ -118,6 +131,7 @@ class RoleHauler extends CreepBase {
           // Move to it
           this.creep.moveTo(closestContainer, {
             visualizePathStyle: { stroke: "#ffaa00" },
+            reusePath: 1,
           });
         }
         return;
@@ -127,6 +141,7 @@ class RoleHauler extends CreepBase {
         if (garageFlag) {
           this.creep.moveTo(garageFlag, {
             visualizePathStyle: { stroke: "#ffaa00" },
+            reusePath: 1,
           });
         }
       }
