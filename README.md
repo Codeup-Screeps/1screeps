@@ -24,6 +24,6 @@ module.exports = function (grunt) {
 };
 ```
 
-Next, run `npm install` to install the dependencies.
+Next, open a terminal at the root of this project and run `npm install` to install the dependencies.
 
 Your code goes in the `dist` folder. To upload it to the Screeps server, run `npm run push` in the terminal.
