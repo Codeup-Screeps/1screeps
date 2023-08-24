@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-You'll need to create a `screeps.json` file in the root of the project. A `screeps.example.json` has been added to the project as a template.
+You'll need to create a `screeps.json` file in the root of the project and add in your own token generated from your Screeps account. A `screeps.example.json` has been added to the project as a template.
 
 Next, open a terminal at the root of this project and run `npm install` to install the dependencies.
 
