@@ -2,37 +2,17 @@
 
 ## Getting Started
 
-You'll need to create a `Gruntfile.js` file in the root of the project. It should look something like this:
-
-```javascript
-module.exports = function (grunt) {
-  grunt.loadNpmTasks("grunt-screeps");
-
-  grunt.initConfig({
-    screeps: {
-      options: {
-        email: "YOUR-EMAIL-HERE",
-        token: "YOUR-SCREEPS-API-TOKEN-HERE",
-        branch: "default",
-        server: "shard3",
-      },
-      dist: {
-        src: ["dist/*.js"],
-      },
-    },
-  });
-};
-```
+You'll need to create a `screeps.json` file in the root of the project. A `screeps.example.json` has been added to the project as a template.
 
 Next, open a terminal at the root of this project and run `npm install` to install the dependencies.
 
-Your code goes in the `dist` folder. To upload it to the Screeps server, run `npm run push` in the terminal.
+The code is located in the `src` folder. To upload it to the Screeps server, run `npm run push` in the terminal.
 
 ## How it works
 
-Screeps uses NodeJS as its runtime, but it has a few limitations if you're using the IDE in the game. Mainly, it doesn't support `import` or `export` statements, and doesn't support nested directories. Here, we're using Grunt to push code from the `dist` folder to the server, but we can expand it to overcome these limitations in the future by having it compile all of our code into a single `main.js` file. For now, I'm putting all of my code in the `dist` folder and using `npm run push` to push it to the server.
+Screeps uses NodeJS as its runtime, but it has a few limitations if you're using the IDE in the game. Mainly, it doesn't support `import` or `export` statements, and doesn't support nested directories. Here, we're using a bundler to give us the ability to write javascript in the way we know and love, and it will compile it into the `dist` folder when uploading to the Screeps server.
 
-This is because, for now, I wanted to make sure I could get the code to run, and see all of the files in the game.
+This configuration does support TypeScript, but I'm not currently using it. I'm still in the process of changing my codebase rapidly while learning the game, and I don't want to have to worry about updating the types as I go. I may switch to TypeScript in the future, but for now I'm sticking with plain old JavaScript.
 
 ### Class-based Approach (OOP)
 
