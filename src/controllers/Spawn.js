@@ -73,7 +73,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough upgraders
-    else if (this.upgraders < 2) {
+    else if (this.upgraders < 1) {
       // Spawn a new one
 
       var newName = "Upgrader" + Game.time;
