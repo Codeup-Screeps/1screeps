@@ -1,4 +1,4 @@
-const CreepBase = require("role.creepbase");
+import CreepBase from "./CreepBase";
 
 class Repairer extends CreepBase {
   /** @param {Creep} creep **/
@@ -38,4 +38,4 @@ class Repairer extends CreepBase {
   }
 }
 
-module.exports = Repairer;
+export default Repairer;

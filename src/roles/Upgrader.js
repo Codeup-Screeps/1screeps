@@ -1,4 +1,4 @@
-const CreepBase = require("role.creepbase");
+import CreepBase from "./CreepBase";
 
 class RoleUpgrader extends CreepBase {
   /**
@@ -43,5 +43,4 @@ class RoleUpgrader extends CreepBase {
     }
   }
 }
-
-module.exports = RoleUpgrader;
+export default RoleUpgrader;

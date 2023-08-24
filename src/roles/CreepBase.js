@@ -136,4 +136,4 @@ class CreepBase {
   }
 }
 
-module.exports = CreepBase;
+export default CreepBase;

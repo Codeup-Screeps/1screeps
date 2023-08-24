@@ -1,4 +1,5 @@
-const CreepBase = require("role.creepbase");
+import CreepBase from "./CreepBase";
+
 class Builder extends CreepBase {
   /** @param {Creep} creep **/
   constructor(creep) {
@@ -66,4 +67,4 @@ class Builder extends CreepBase {
   }
 }
 
-module.exports = Builder;
+export default Builder;

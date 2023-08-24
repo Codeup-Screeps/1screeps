@@ -46,4 +46,4 @@ class CreepsController {
   }
 }
 
-module.exports = CreepsController;
+export default CreepsController;

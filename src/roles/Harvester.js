@@ -1,4 +1,5 @@
-const CreepBase = require("role.creepbase");
+import CreepBase from "./CreepBase";
+
 class RoleHarvester extends CreepBase {
   /**
    * @param {Creep} creep
@@ -81,4 +82,4 @@ class RoleHarvester extends CreepBase {
   }
 }
 
-module.exports = RoleHarvester;
+export default RoleHarvester;

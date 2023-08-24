@@ -31,4 +31,4 @@ class Tower {
   }
 }
 
-module.exports = Tower;
+export default Tower;

@@ -1,4 +1,4 @@
-const CreepsController = require("./controller.creeps");
+import CreepsController from "./Creeps";
 
 class SpawnController {
   constructor(spawn) {
@@ -184,4 +184,4 @@ class SpawnController {
   }
 }
 
-module.exports = SpawnController;
+export default SpawnController;
