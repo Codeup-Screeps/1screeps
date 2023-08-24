@@ -64,6 +64,7 @@ class RoleHauler extends CreepBase {
           this.creep.moveTo(closestSpawn, {
             visualizePathStyle: { stroke: "#ffaa00" },
             reusePath: 1,
+            // ignoreCreeps: true,
           });
         }
         return;
@@ -87,6 +88,7 @@ class RoleHauler extends CreepBase {
           this.creep.moveTo(closestExtension, {
             visualizePathStyle: { stroke: "#ffaa00" },
             reusePath: 1,
+            // ignoreCreeps: true,
           });
         }
         return;
@@ -109,6 +111,7 @@ class RoleHauler extends CreepBase {
           this.creep.moveTo(closestTower, {
             visualizePathStyle: { stroke: "#ffaa00" },
             reusePath: 1,
+            // ignoreCreeps: true,
           });
         }
         return;
@@ -132,17 +135,23 @@ class RoleHauler extends CreepBase {
           this.creep.moveTo(closestContainer, {
             visualizePathStyle: { stroke: "#ffaa00" },
             reusePath: 1,
+            // ignoreCreeps: true,
           });
         }
         return;
       } else {
-        // park the hauler at a flag named "Garage"
-        const garageFlag = Game.flags["Garage"];
-        if (garageFlag) {
-          this.creep.moveTo(garageFlag, {
+        // if no containers, move to spawn and drop energy
+        const spawn = this.creep.pos.findClosestByRange(FIND_MY_SPAWNS);
+        if (this.creep.transfer(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+          this.creep.moveTo(spawn, {
             visualizePathStyle: { stroke: "#ffaa00" },
             reusePath: 1,
           });
+        } else {
+          this.creep.drop(RESOURCE_ENERGY);
+          // head back toward source and wait
+          this.creep.memory.hauling = false;
+          this.creep.say("🔄 collect");
         }
       }
     }

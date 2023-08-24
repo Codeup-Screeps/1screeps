@@ -31,6 +31,8 @@ class CreepBase {
       // Move to it
       this.creep.moveTo(this.creep.room.controller, {
         visualizePathStyle: { stroke: "#ffffff" },
+        // ignoreCreeps: true,
+        reusePath: 1,
       });
     } else {
       // check if there are screeps behind it
@@ -39,6 +41,8 @@ class CreepBase {
       if (behind.length > 0) {
         this.creep.moveTo(this.creep.room.controller, {
           visualizePathStyle: { stroke: "#ffffff" },
+          //   ignoreCreeps: true,
+          reusePath: 1,
         });
       }
     }
@@ -50,6 +54,11 @@ class CreepBase {
         structure.hits < structure.hitsMax &&
         structure.structureType != STRUCTURE_WALL,
     });
+    // filter out ramparts if they are below 50k hits
+    structuresToRepair = structuresToRepair.filter(
+      (structure) =>
+        structure.structureType != STRUCTURE_RAMPART || structure.hits > 50000
+    );
     structuresToRepair.sort((a, b) => a.hits - b.hits); // Repair the most damaged first
 
     if (structuresToRepair.length > 0) {
@@ -69,6 +78,8 @@ class CreepBase {
       if (this.creep.repair(structuresToRepair[0]) === ERR_NOT_IN_RANGE) {
         this.creep.moveTo(structuresToRepair[0], {
           visualizePathStyle: { stroke: "#ffaa00" },
+          //   ignoreCreeps: true,
+          reusePath: 1,
         });
       }
       return true;
@@ -94,6 +105,8 @@ class CreepBase {
       ) {
         this.creep.moveTo(closestContainer, {
           visualizePathStyle: { stroke: "#ffaa00" },
+          //   ignoreCreeps: true,
+          reusePath: 1,
         });
         return true; // Exit early if we're moving to a container or storage
       }
@@ -113,6 +126,8 @@ class CreepBase {
       if (this.creep.pickup(closestDroppedEnergy) === ERR_NOT_IN_RANGE) {
         this.creep.moveTo(closestDroppedEnergy, {
           visualizePathStyle: { stroke: "#ffaa00" },
+          //   ignoreCreeps: true,
+          reusePath: 1,
         });
         return true;
       }

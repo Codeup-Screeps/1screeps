@@ -68,6 +68,8 @@ class RoleHarvester extends CreepBase {
       if (harvestResult == ERR_NOT_IN_RANGE) {
         this.creep.moveTo(closestAvailableSource, {
           visualizePathStyle: { stroke: "#ffaa00" },
+          //   ignoreCreeps: true,
+          reusePath: 1,
         });
       } else if (harvestResult == OK) {
         // Check if the harvester is adjacent to the source

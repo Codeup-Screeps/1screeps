@@ -5,6 +5,7 @@ const RoleHauler = require("role.hauler");
 const RoleBuilder = require("role.builder");
 const RoleRepairer = require("role.repairer");
 const SpawnController = require("controller.spawn");
+const Tower = require("role.tower");
 
 // Import pathing management
 // const Pathing = require("pathing");
@@ -57,5 +58,12 @@ module.exports.loop = function () {
     }
     // running all creep moves
     // Pathing.runMoves();
+  }
+  // Loop through towers
+  for (let tower of _.filter(
+    Game.structures,
+    (structure) => structure.structureType == STRUCTURE_TOWER
+  )) {
+    new Tower(tower).run();
   }
 };

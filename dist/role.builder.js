@@ -26,6 +26,8 @@ class Builder extends CreepBase {
         if (this.creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
           this.creep.moveTo(targets[0], {
             visualizePathStyle: { stroke: "#ffffff" },
+            // ignoreCreeps: true,
+            reusePath: 1,
           });
         }
         return;
@@ -44,6 +46,7 @@ class Builder extends CreepBase {
         if (this.creep.repair(wallsToRepair[0]) === ERR_NOT_IN_RANGE) {
           this.creep.moveTo(wallsToRepair[0], {
             visualizePathStyle: { stroke: "#ffaa00" },
+            reusePath: 1,
           });
         }
         return;

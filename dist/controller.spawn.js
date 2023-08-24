@@ -47,7 +47,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough haulers
-    else if (this.haulers < this.sourceCount * 2) {
+    else if (this.haulers < this.sourceCount * 1) {
       // Spawn a new one
 
       var newName = "Hauler" + Game.time;
@@ -56,7 +56,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough builders
-    else if (this.builders < 3) {
+    else if (this.builders < 2) {
       // Spawn a new one
 
       var newName = "Builder" + Game.time;
@@ -65,7 +65,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough repairers
-    else if (this.repairers < 3) {
+    else if (this.repairers < 1) {
       // Spawn a new one
       var newName = "Repairer" + Game.time;
       this.spawn.spawnCreep(this.creepLoadout("repairer"), newName, {
@@ -73,7 +73,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough upgraders
-    else if (this.upgraders < 1) {
+    else if (this.upgraders < 2) {
       // Spawn a new one
 
       var newName = "Upgrader" + Game.time;
@@ -112,11 +112,20 @@ class SpawnController {
     const body = [];
     switch (type) {
       case "harvester":
+        if (availableEnergy > 500) {
+          availableEnergy = 500;
+        }
         body.push(MOVE);
         availableEnergy -= parts["MOVE"];
-        while (availableEnergy >= parts["WORK"]) {
-          body.push(WORK);
-          availableEnergy -= parts["WORK"];
+        // harvesters mostly work, but need to replace dead ones quicker
+        for (let i = 1; availableEnergy >= parts["WORK"]; i++) {
+          if (i % 3 === 0) {
+            body.unshift(MOVE);
+            availableEnergy -= parts["MOVE"];
+          } else {
+            body.push(WORK);
+            availableEnergy -= parts["WORK"];
+          }
         }
         break;
       case "hauler":
