@@ -36,7 +36,7 @@ This is because, for now, I wanted to make sure I could get the code to run, and
 
 ### Class-based Approach (OOP)
 
-When brainstorming and looking through existing code-bases for Screeps, I saw how most people were creating enormous chains of logic through several nested functions. It was difficult for me to keep track of what was going on, and I wanted to a way to make it easier to understand and maintain. Using contextually named classes, I've been able to break down the logic into smaller, more manageable chunks, and build on seperate logic paths without losing track of what's going on.
+When brainstorming and looking through existing code-bases for Screeps, I saw how most people were creating enormous chains of logic through several nested functions. It was difficult for me to keep track of what was going on, and I wanted to a way to make it easier to understand and maintain. Using contextually named classes, I've been able to break down the logic into smaller, more manageable chunks, and build on seperate logic paths without "getting lost in the sauce".
 
 While functional programming can be more efficient with CPU usage, an object oriented programming approach is a worthwhile trade-off for the readability and maintainability of the code.
 
