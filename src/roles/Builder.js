@@ -53,7 +53,7 @@ class Builder extends CreepBase {
         return;
       }
       // If no construction sites, perform backup role
-      this.performRepairRole();
+      this.performUpgradeRole();
     } else {
       // try to withdraw from containers or storage
       if (this.collectFromContainers()) {
