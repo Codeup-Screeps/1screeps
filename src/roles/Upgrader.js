@@ -16,10 +16,7 @@ class RoleUpgrader extends CreepBase {
       this.creep.say("🔄 harvest");
     }
     // Otherwise if the creep is not upgrading but is full
-    else if (
-      !this.creep.memory.upgrading &&
-      this.creep.store.getFreeCapacity() == 0
-    ) {
+    else if (!this.creep.memory.upgrading && this.creep.store.getFreeCapacity() == 0) {
       // Set upgrading to true and say so
       this.creep.memory.upgrading = true;
       this.creep.say("⚡ upgrade");

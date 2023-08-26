@@ -9,29 +9,14 @@ class CreepBase {
   addRoadSites() {
     // if current position doesn't have a road, create construction site
     if (
-      this.creep.room.lookForAt(
-        LOOK_STRUCTURES,
-        this.creep.pos.x,
-        this.creep.pos.y
-      ).length == 0 &&
-      this.creep.room.lookForAt(
-        LOOK_CONSTRUCTION_SITES,
-        this.creep.pos.x,
-        this.creep.pos.y
-      ).length == 0
+      this.creep.room.lookForAt(LOOK_STRUCTURES, this.creep.pos.x, this.creep.pos.y).length == 0 &&
+      this.creep.room.lookForAt(LOOK_CONSTRUCTION_SITES, this.creep.pos.x, this.creep.pos.y).length == 0
     ) {
-      this.creep.room.createConstructionSite(
-        this.creep.pos.x,
-        this.creep.pos.y,
-        STRUCTURE_ROAD
-      );
+      this.creep.room.createConstructionSite(this.creep.pos.x, this.creep.pos.y, STRUCTURE_ROAD);
     }
   }
   performUpgradeRole() {
-    if (
-      this.creep.upgradeController(this.creep.room.controller) ==
-      ERR_NOT_IN_RANGE
-    ) {
+    if (this.creep.upgradeController(this.creep.room.controller) == ERR_NOT_IN_RANGE) {
       // Move to it
       this.creep.moveTo(this.creep.room.controller, {
         visualizePathStyle: { stroke: "#ffffff" },
@@ -54,27 +39,17 @@ class CreepBase {
   performRepairRole() {
     // Repairing logic
     let structuresToRepair = this.creep.room.find(FIND_STRUCTURES, {
-      filter: (structure) =>
-        structure.hits < structure.hitsMax &&
-        structure.structureType != STRUCTURE_WALL,
+      filter: (structure) => structure.hits < structure.hitsMax && structure.structureType != STRUCTURE_WALL,
     });
     // filter out ramparts if they are below 50k hits
-    structuresToRepair = structuresToRepair.filter(
-      (structure) =>
-        structure.structureType != STRUCTURE_RAMPART || structure.hits > 50000
-    );
+    structuresToRepair = structuresToRepair.filter((structure) => structure.structureType != STRUCTURE_RAMPART || structure.hits > 50000);
     structuresToRepair.sort((a, b) => a.hits - b.hits); // Repair the most damaged first
 
     if (structuresToRepair.length > 0) {
       // Non road structures
-      const nonRoadStructuresToRepair = structuresToRepair.filter(
-        (structure) => structure.structureType != STRUCTURE_ROAD
-      );
+      const nonRoadStructuresToRepair = structuresToRepair.filter((structure) => structure.structureType != STRUCTURE_ROAD);
       // Non road structures with less than half hits
-      const nonRoadStructuresToRepairLessThanHalf =
-        nonRoadStructuresToRepair.filter(
-          (structure) => structure.hits < structure.hitsMax / 2
-        );
+      const nonRoadStructuresToRepairLessThanHalf = nonRoadStructuresToRepair.filter((structure) => structure.hits < structure.hitsMax / 2);
       if (nonRoadStructuresToRepairLessThanHalf.length > 0) {
         structuresToRepair = nonRoadStructuresToRepairLessThanHalf;
       }
@@ -95,18 +70,30 @@ class CreepBase {
   }
   collectFromContainers() {
     const containers = this.creep.room.find(FIND_STRUCTURES, {
-      filter: (s) =>
-        (s.structureType == STRUCTURE_CONTAINER ||
-          s.structureType == STRUCTURE_STORAGE) &&
-        s.store[RESOURCE_ENERGY] > 0,
+      filter: (s) => (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) && s.store[RESOURCE_ENERGY] > 0,
     });
 
-    if (containers.length) {
+    if (containers.length > 0) {
       const closestContainer = this.creep.pos.findClosestByPath(containers);
-      if (
-        this.creep.withdraw(closestContainer, RESOURCE_ENERGY) ===
-        ERR_NOT_IN_RANGE
-      ) {
+      if (this.creep.withdraw(closestContainer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+        this.creep.moveTo(closestContainer, {
+          visualizePathStyle: { stroke: "#ffaa00" },
+          //   ignoreCreeps: true,
+          reusePath: 1,
+        });
+        return true; // Exit early if we're moving to a container or storage
+      }
+    }
+    return false;
+  }
+  depositToContainer() {
+    const containers = this.creep.room.find(FIND_STRUCTURES, {
+      filter: (s) => (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) && s.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
+    });
+
+    if (containers.length > 0) {
+      const closestContainer = this.creep.pos.findClosestByPath(containers);
+      if (this.creep.transfer(closestContainer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
         this.creep.moveTo(closestContainer, {
           visualizePathStyle: { stroke: "#ffaa00" },
           //   ignoreCreeps: true,
@@ -123,8 +110,7 @@ class CreepBase {
       filter: (resource) => resource.resourceType == RESOURCE_ENERGY,
     });
 
-    const closestDroppedEnergy =
-      this.creep.pos.findClosestByRange(droppedEnergy);
+    const closestDroppedEnergy = this.creep.pos.findClosestByRange(droppedEnergy);
 
     if (closestDroppedEnergy) {
       if (this.creep.pickup(closestDroppedEnergy) === ERR_NOT_IN_RANGE) {
@@ -133,10 +119,65 @@ class CreepBase {
           //   ignoreCreeps: true,
           reusePath: 1,
         });
-        return true;
       }
+      return true;
     }
     return false;
+  }
+  transferEnergyToExtensions() {
+    // assist haulers by transferring energy from containers to extensions
+    const extensions = this.creep.room.find(FIND_STRUCTURES, {
+      filter: (structure) => structure.structureType == STRUCTURE_EXTENSION && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
+    });
+    if (extensions.length > 0) {
+      // if creep has energy at all, then transfer, otherwise collect
+      if (this.creep.store.getUsedCapacity() > 0) {
+        if (this.creep.transfer(extensions[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+          this.creep.moveTo(extensions[0], {
+            visualizePathStyle: { stroke: "#ffaa00" },
+            reusePath: 1,
+          });
+        }
+      } else {
+        const collectingFromContainers = this.collectFromContainers();
+        if (collectingFromContainers) {
+          return true;
+        }
+      }
+      return true;
+    } else {
+      return false;
+    }
+  }
+  transferEnergyToTowers() {
+    // assist haulers by transferring energy from containers to towers
+    let towers = this.creep.room.find(FIND_STRUCTURES, {
+      filter: (structure) => structure.structureType == STRUCTURE_TOWER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
+    });
+    if (towers.length > 0) {
+      // if creep has capacity, collect from containers
+      if (this.creep.store.getFreeCapacity() > 0) {
+        const collectingFromContainers = this.collectFromContainers();
+        if (collectingFromContainers) {
+          return true;
+        }
+        const collectingFromGround = this.collectFromGround();
+        if (collectingFromGround) {
+          return true;
+        }
+      }
+      // sort towers by energy level
+      towers = towers.sort((a, b) => a.store.getFreeCapacity(RESOURCE_ENERGY) - b.store.getFreeCapacity(RESOURCE_ENERGY));
+      if (this.creep.transfer(towers[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        this.creep.moveTo(towers[0], {
+          visualizePathStyle: { stroke: "#ffaa00" },
+          reusePath: 1,
+        });
+        return true;
+      }
+    } else {
+      return false;
+    }
   }
 }
 
@@ -238,10 +279,7 @@ class RoleUpgrader extends CreepBase {
       this.creep.say("🔄 harvest");
     }
     // Otherwise if the creep is not upgrading but is full
-    else if (
-      !this.creep.memory.upgrading &&
-      this.creep.store.getFreeCapacity() == 0
-    ) {
+    else if (!this.creep.memory.upgrading && this.creep.store.getFreeCapacity() == 0) {
       // Set upgrading to true and say so
       this.creep.memory.upgrading = true;
       this.creep.say("⚡ upgrade");
@@ -283,7 +321,7 @@ class RoleHauler extends CreepBase {
         return;
       }
       // move toward creep.memory.source
-      if (this.movingTowardDesignatedSource()) {
+      if (this.collectFromHarvester()) {
         return;
       }
 
@@ -298,85 +336,80 @@ class RoleHauler extends CreepBase {
         const closestSpawn = this.creep.pos.findClosestByRange(spawns);
 
         // Try to transfer energy to the spawn. If it's not in range
-        if (
-          this.creep.transfer(closestSpawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE
-        ) {
+        if (this.creep.transfer(closestSpawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           // Move to it
           this.creep.moveTo(closestSpawn, {
             visualizePathStyle: { stroke: "#ffaa00" },
             reusePath: 1,
-            // ignoreCreeps: true,
           });
         }
         return;
       }
       // Find extensions in the room that aren't full
       const extensions = this.creep.room.find(FIND_STRUCTURES, {
-        filter: (structure) =>
-          structure.structureType == STRUCTURE_EXTENSION &&
-          structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
+        filter: (structure) => structure.structureType == STRUCTURE_EXTENSION && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
       });
       if (extensions.length > 0) {
         // Find the closest extension
         const closestExtension = this.creep.pos.findClosestByRange(extensions);
 
         // Try to transfer energy to the extension. If it's not in range
-        if (
-          this.creep.transfer(closestExtension, RESOURCE_ENERGY) ==
-          ERR_NOT_IN_RANGE
-        ) {
+        if (this.creep.transfer(closestExtension, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           // Move to it
           this.creep.moveTo(closestExtension, {
             visualizePathStyle: { stroke: "#ffaa00" },
             reusePath: 1,
-            // ignoreCreeps: true,
           });
         }
         return;
       }
-      // Find towers in the room that aren't full
+      // Find towers in the room that are not below 50% energy
       const towers = this.creep.room.find(FIND_STRUCTURES, {
-        filter: (structure) =>
-          structure.structureType == STRUCTURE_TOWER &&
-          structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
+        filter: (structure) => structure.structureType == STRUCTURE_TOWER && structure.energy < 500,
       });
       if (towers.length > 0) {
-        // Find the closest tower
-        const closestTower = this.creep.pos.findClosestByRange(towers);
-
         // Try to transfer energy to the tower. If it's not in range
-        if (
-          this.creep.transfer(closestTower, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE
-        ) {
+        if (this.creep.transfer(towers[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           // Move to it
-          this.creep.moveTo(closestTower, {
+          this.creep.moveTo(towers[0], {
             visualizePathStyle: { stroke: "#ffaa00" },
             reusePath: 1,
-            // ignoreCreeps: true,
           });
         }
         return;
       }
       // Find containers in the room that aren't full
       const containers = this.creep.room.find(FIND_STRUCTURES, {
-        filter: (structure) =>
-          structure.structureType == STRUCTURE_CONTAINER &&
-          structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
+        filter: (structure) => structure.structureType == STRUCTURE_CONTAINER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
       });
       if (containers.length > 0) {
         // Find the closest container
         const closestContainer = this.creep.pos.findClosestByRange(containers);
 
         // Try to transfer energy to the container. If it's not in range
-        if (
-          this.creep.transfer(closestContainer, RESOURCE_ENERGY) ==
-          ERR_NOT_IN_RANGE
-        ) {
+        if (this.creep.transfer(closestContainer, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           // Move to it
           this.creep.moveTo(closestContainer, {
             visualizePathStyle: { stroke: "#ffaa00" },
             reusePath: 1,
-            // ignoreCreeps: true,
+          });
+        }
+        return;
+      }
+      // Find storage in the room that isn't full
+      const storage = this.creep.room.find(FIND_STRUCTURES, {
+        filter: (structure) => structure.structureType == STRUCTURE_STORAGE && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
+      });
+      if (storage.length > 0) {
+        // Find the closest storage
+        const closestStorage = this.creep.pos.findClosestByRange(storage);
+
+        // Try to transfer energy to the storage. If it's not in range
+        if (this.creep.transfer(closestStorage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+          // Move to it
+          this.creep.moveTo(closestStorage, {
+            visualizePathStyle: { stroke: "#ffaa00" },
+            reusePath: 1,
           });
         }
         return;
@@ -402,28 +435,18 @@ class RoleHauler extends CreepBase {
       this.creep.memory.hauling = false;
       this.creep.say("🔄 collect");
     }
-    if (
-      !this.creep.memory.hauling &&
-      this.creep.store.getFreeCapacity() === 0
-    ) {
+    if (!this.creep.memory.hauling && this.creep.store.getFreeCapacity() === 0) {
       this.creep.memory.hauling = true;
       this.creep.say("📦 haul");
     }
   }
   collectingAroundSpawn() {
     const spawn = this.creep.pos.findClosestByRange(FIND_MY_SPAWNS);
-    const spawnDroppedEnergy = spawn.pos.findInRange(
-      FIND_DROPPED_RESOURCES,
-      1,
-      {
-        filter: (resource) => resource.resourceType == RESOURCE_ENERGY,
-      }
-    );
+    const spawnDroppedEnergy = spawn.pos.findInRange(FIND_DROPPED_RESOURCES, 1, {
+      filter: (resource) => resource.resourceType == RESOURCE_ENERGY,
+    });
     // if there is dropped energy around it and it's not full
-    if (
-      spawnDroppedEnergy.length > 0 &&
-      spawn.store.getFreeCapacity(RESOURCE_ENERGY) > 0
-    ) {
+    if (spawnDroppedEnergy.length > 0 && spawn.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
       // try to pick it up
       if (this.creep.pickup(spawnDroppedEnergy[0]) == ERR_NOT_IN_RANGE) {
         // move to it
@@ -437,34 +460,20 @@ class RoleHauler extends CreepBase {
     }
     return false;
   }
-  movingTowardDesignatedSource() {
-    const source = Game.getObjectById(this.creep.memory.source);
-    // if not within 10 range of source
-    if (this.creep.pos.getRangeTo(source) > 3) {
-      // move toward source
-      this.creep.moveTo(source, {
-        visualizePathStyle: { stroke: "#ffaa00" },
-        reusePath: 1,
-      });
-      return true;
-    }
-    return false;
-  }
   collectFromHarvester() {
-    // Get all the dropped energy
     const droppedEnergy = this.creep.room.find(FIND_DROPPED_RESOURCES, {
       filter: (resource) => resource.resourceType == RESOURCE_ENERGY,
     });
-    // Find the closest dropped energy
-    const closestDroppedEnergy =
-      this.creep.pos.findClosestByRange(droppedEnergy);
-    // Try to pickup the energy. If it's not in range
-    if (this.creep.pickup(closestDroppedEnergy) == ERR_NOT_IN_RANGE) {
-      // Move to it
-      this.creep.moveTo(closestDroppedEnergy, {
-        visualizePathStyle: { stroke: "#ffaa00" },
-        reusePath: 1,
-      });
+    if (droppedEnergy.length > 0) {
+      // largest energy first
+      droppedEnergy.sort((a, b) => b.amount - a.amount);
+      if (this.creep.pickup(droppedEnergy[0]) == ERR_NOT_IN_RANGE) {
+        this.creep.moveTo(droppedEnergy[0], {
+          visualizePathStyle: { stroke: "#ffaa00" },
+          reusePath: 1,
+        });
+      }
+      return true;
     }
   }
 }
@@ -481,18 +490,17 @@ class Builder extends CreepBase {
       this.creep.memory.building = false;
       this.creep.say("🔄 collect");
     }
-    if (
-      !this.creep.memory.building &&
-      this.creep.store.getFreeCapacity() === 0
-    ) {
+    if (!this.creep.memory.building && this.creep.store.getFreeCapacity() === 0) {
       this.creep.memory.building = true;
       this.creep.say("🚧 build");
     }
 
     if (this.creep.memory.building) {
-      // Simplified building logic
+      // find construction sites
       let targets = this.creep.room.find(FIND_CONSTRUCTION_SITES);
-      if (targets.length) {
+      // remove ramparts that have over 50k hits
+      targets = targets.filter((target) => target.structureType !== STRUCTURE_RAMPART || target.hits < 50000);
+      if (targets.length > 0) {
         if (this.creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
           this.creep.moveTo(targets[0], {
             visualizePathStyle: { stroke: "#ffffff" },
@@ -505,10 +513,7 @@ class Builder extends CreepBase {
 
       // if walls to repair
       const wallsToRepair = this.creep.room.find(FIND_STRUCTURES, {
-        filter: (structure) =>
-          structure.structureType == STRUCTURE_WALL &&
-          structure.hits < structure.hitsMax &&
-          structure.hits < 1000000,
+        filter: (structure) => structure.structureType == STRUCTURE_WALL && structure.hits < structure.hitsMax && structure.hits < 1000000,
       });
 
       if (wallsToRepair.length > 0 && this.repairWalls) {
@@ -521,8 +526,20 @@ class Builder extends CreepBase {
         }
         return;
       }
-      // If no construction sites, perform backup role
-      this.performUpgradeRole();
+      // If no construction sites, perform backup roles
+      if (this.transferEnergyToExtensions()) {
+        return;
+      }
+      if (this.transferEnergyToTowers()) {
+        return;
+      }
+      if (this.depositToContainer()) {
+        return;
+      }
+      //   if (this.transferEnergyToExtensions()) {
+      //     return;
+      //   }
+      //   this.performRepairRole();
     } else {
       // try to withdraw from containers or storage
       if (this.collectFromContainers()) {
@@ -594,25 +611,25 @@ class CreepsController {
     };
   }
   run() {
-    this.assignHaulerSource();
+    // this.assignHaulerSource();
     return;
   }
   assignHaulerSource() {
     // assign a designated source to each hauler in memory
     // if the hauler already has a source, leave it alone
     // otherwise, assign it to the source with the fewest haulers
-    this.creeps.haulers.forEach((hauler) => {
-      if (hauler.memory.source) {
-        return;
-      }
-      let source = _.min(this.sources, (source) => {
-        return _.filter(
-          this.creeps.haulers,
-          (creep) => creep.memory.source == source.id
-        ).length;
-      });
-      hauler.memory.source = source.id;
-    });
+    // this.creeps.haulers.forEach((hauler) => {
+    //   if (hauler.memory.source) {
+    //     return;
+    //   }
+    //   let source = _.min(this.sources, (source) => {
+    //     return _.filter(
+    //       this.creeps.haulers,
+    //       (creep) => creep.memory.source == source.id
+    //     ).length;
+    //   });
+    //   hauler.memory.source = source.id;
+    // });
   }
   getEnergySources() {
     return this.room.find(FIND_SOURCES);
@@ -639,18 +656,15 @@ class SpawnController {
       filter: (structure) => structure.structureType == STRUCTURE_EXTENSION,
     }).length;
     // wait on energy to create larger creeps
-    this.minBuild = 300 + 50 * this.extensions;
+    this.minBuild = 300 + (50 * this.extensions) / 3;
+    this.maxBuild = 300 + (50 * this.extensions) / 2;
     // in the case of a base meltdown, let spawn create smaller creeps
-    if (this.harvesters === 0 || this.haulers < 2) {
+    if (this.harvesters === 0 || this.haulers === 0) {
       this.minBuild = 300;
     }
     this.creepsController = new CreepsController(spawn);
   }
   run() {
-    let availableEnergy = parseFloat(this.spawn.room.energyAvailable);
-    if (availableEnergy < this.minBuild) {
-      return;
-    }
     this.spawnNewCreeps();
     this.announceNewCreeps();
     this.creepsController.run();
@@ -659,6 +673,10 @@ class SpawnController {
     return _.filter(Game.creeps, (creep) => creep.memory.role == type).length;
   }
   spawnNewCreeps() {
+    let availableEnergy = parseFloat(this.spawn.room.energyAvailable);
+    if (this.minBuild > availableEnergy) {
+      return;
+    }
     // If there aren't enough harvesters
     if (this.harvesters < this.sourceCount) {
       // Spawn a new one
@@ -669,7 +687,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough haulers
-    else if (this.haulers < this.sourceCount * 1) {
+    else if (this.haulers < 1) {
       // Spawn a new one
 
       var newName = "Hauler" + Game.time;
@@ -678,7 +696,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough builders
-    else if (this.builders < 2) {
+    else if (this.builders < 1) {
       // Spawn a new one
 
       var newName = "Builder" + Game.time;
@@ -711,16 +729,17 @@ class SpawnController {
       var spawningCreep = Game.creeps[this.spawn.spawning.name];
 
       // Visualize the role of the spawning creep above the spawn
-      this.spawn.room.visual.text(
-        "🛠️" + spawningCreep.memory.role,
-        this.spawn.pos.x + 1,
-        this.spawn.pos.y,
-        { align: "left", opacity: 0.8 }
-      );
+      this.spawn.room.visual.text("🛠️" + spawningCreep.memory.role, this.spawn.pos.x + 1, this.spawn.pos.y, { align: "left", opacity: 0.8 });
     }
   }
   creepLoadout(type) {
     let availableEnergy = parseFloat(this.spawn.room.energyAvailable);
+    // control the size of harvesters based on available energy
+    console.log(`Building new ${type} screep.`);
+    console.log(`availableEnergy: ${availableEnergy}, minBuild: ${this.minBuild}, maxBuild: ${this.maxBuild}`);
+    if (availableEnergy > this.maxEnergy) {
+      availableEnergy = this.maxEnergy;
+    }
     const parts = {
       MOVE: 50,
       WORK: 100,
@@ -734,14 +753,11 @@ class SpawnController {
     const body = [];
     switch (type) {
       case "harvester":
-        if (availableEnergy > 500) {
-          availableEnergy = 500;
-        }
         body.push(MOVE);
         availableEnergy -= parts["MOVE"];
         // harvesters mostly work, but need to replace dead ones quicker
         for (let i = 1; availableEnergy >= parts["WORK"]; i++) {
-          if (i % 3 === 0) {
+          if (i % 4 === 0) {
             body.unshift(MOVE);
             availableEnergy -= parts["MOVE"];
           } else {
@@ -752,8 +768,7 @@ class SpawnController {
         break;
       case "hauler":
         body.push(CARRY, CARRY, MOVE, MOVE);
-        availableEnergy -=
-          parts["CARRY"] + parts["CARRY"] + parts["MOVE"] + parts["MOVE"];
+        availableEnergy -= parts["CARRY"] + parts["CARRY"] + parts["MOVE"] + parts["MOVE"];
         while (availableEnergy >= parts["CARRY"] + parts["MOVE"]) {
           body.unshift(CARRY);
           body.push(MOVE);
@@ -763,10 +778,7 @@ class SpawnController {
       case "upgrader":
         body.push(WORK, CARRY, MOVE);
         availableEnergy -= parts["WORK"] + parts["CARRY"] + parts["MOVE"];
-        while (
-          availableEnergy >=
-          parts["WORK"] + parts["CARRY"] + parts["MOVE"]
-        ) {
+        while (availableEnergy >= parts["WORK"] + parts["CARRY"] + parts["MOVE"]) {
           body.unshift(WORK);
           body.push(CARRY);
           body.push(MOVE);
@@ -776,10 +788,7 @@ class SpawnController {
       case "builder":
         body.push(WORK, CARRY, MOVE);
         availableEnergy -= parts["WORK"] + parts["CARRY"] + parts["MOVE"];
-        while (
-          availableEnergy >=
-          parts["WORK"] + parts["CARRY"] + parts["MOVE"]
-        ) {
+        while (availableEnergy >= parts["WORK"] + parts["CARRY"] + parts["MOVE"]) {
           body.unshift(WORK);
           body.push(CARRY);
           body.push(MOVE);
@@ -789,10 +798,7 @@ class SpawnController {
       case "repairer":
         body.push(WORK, CARRY, MOVE);
         availableEnergy -= parts["WORK"] + parts["CARRY"] + parts["MOVE"];
-        while (
-          availableEnergy >=
-          parts["WORK"] + parts["CARRY"] + parts["MOVE"]
-        ) {
+        while (availableEnergy >= parts["WORK"] + parts["CARRY"] + parts["MOVE"]) {
           body.unshift(WORK);
           body.push(CARRY);
           body.push(MOVE);
@@ -826,12 +832,14 @@ class Tower {
       this.tower.heal(friendlyTarget);
       return;
     }
-    // repair structures (not walls)
-    const structureTarget = this.tower.pos.findClosestByRange(FIND_STRUCTURES, {
-      filter: (structure) =>
-        structure.hits < structure.hitsMax &&
-        structure.structureType != STRUCTURE_WALL,
+    // repair targets within range of tower
+    const structureTargets = this.tower.room.find(FIND_STRUCTURES, {
+      filter: (structure) => structure.hits < structure.hitsMax && structure.hits < 150000 && structure.pos.getRangeTo(this.tower) < 20,
     });
+
+    // sort by hits
+    structureTargets.sort((a, b) => a.hits - b.hits);
+    const structureTarget = structureTargets[0];
     if (structureTarget) {
       this.tower.repair(structureTarget);
       return;

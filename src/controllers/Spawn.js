@@ -17,18 +17,15 @@ class SpawnController {
       filter: (structure) => structure.structureType == STRUCTURE_EXTENSION,
     }).length;
     // wait on energy to create larger creeps
-    this.minBuild = 300 + 50 * this.extensions;
+    this.minBuild = 300 + (50 * this.extensions) / 3;
+    this.maxBuild = 300 + (50 * this.extensions) / 2;
     // in the case of a base meltdown, let spawn create smaller creeps
-    if (this.harvesters === 0 || this.haulers < 2) {
+    if (this.harvesters === 0 || this.haulers === 0) {
       this.minBuild = 300;
     }
     this.creepsController = new CreepsController(spawn);
   }
   run() {
-    let availableEnergy = parseFloat(this.spawn.room.energyAvailable);
-    if (availableEnergy < this.minBuild) {
-      return;
-    }
     this.spawnNewCreeps();
     this.announceNewCreeps();
     this.creepsController.run();
@@ -37,6 +34,10 @@ class SpawnController {
     return _.filter(Game.creeps, (creep) => creep.memory.role == type).length;
   }
   spawnNewCreeps() {
+    let availableEnergy = parseFloat(this.spawn.room.energyAvailable);
+    if (this.minBuild > availableEnergy) {
+      return;
+    }
     // If there aren't enough harvesters
     if (this.harvesters < this.sourceCount) {
       // Spawn a new one
@@ -47,7 +48,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough haulers
-    else if (this.haulers < this.sourceCount * 1) {
+    else if (this.haulers < 1) {
       // Spawn a new one
 
       var newName = "Hauler" + Game.time;
@@ -56,7 +57,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough builders
-    else if (this.builders < 2) {
+    else if (this.builders < 1) {
       // Spawn a new one
 
       var newName = "Builder" + Game.time;
@@ -89,16 +90,17 @@ class SpawnController {
       var spawningCreep = Game.creeps[this.spawn.spawning.name];
 
       // Visualize the role of the spawning creep above the spawn
-      this.spawn.room.visual.text(
-        "🛠️" + spawningCreep.memory.role,
-        this.spawn.pos.x + 1,
-        this.spawn.pos.y,
-        { align: "left", opacity: 0.8 }
-      );
+      this.spawn.room.visual.text("🛠️" + spawningCreep.memory.role, this.spawn.pos.x + 1, this.spawn.pos.y, { align: "left", opacity: 0.8 });
     }
   }
   creepLoadout(type) {
     let availableEnergy = parseFloat(this.spawn.room.energyAvailable);
+    // control the size of harvesters based on available energy
+    console.log(`Building new ${type} screep.`);
+    console.log(`availableEnergy: ${availableEnergy}, minBuild: ${this.minBuild}, maxBuild: ${this.maxBuild}`);
+    if (availableEnergy > this.maxEnergy) {
+      availableEnergy = this.maxEnergy;
+    }
     const parts = {
       MOVE: 50,
       WORK: 100,
@@ -112,14 +114,11 @@ class SpawnController {
     const body = [];
     switch (type) {
       case "harvester":
-        if (availableEnergy > 500) {
-          availableEnergy = 500;
-        }
         body.push(MOVE);
         availableEnergy -= parts["MOVE"];
         // harvesters mostly work, but need to replace dead ones quicker
         for (let i = 1; availableEnergy >= parts["WORK"]; i++) {
-          if (i % 3 === 0) {
+          if (i % 4 === 0) {
             body.unshift(MOVE);
             availableEnergy -= parts["MOVE"];
           } else {
@@ -130,8 +129,7 @@ class SpawnController {
         break;
       case "hauler":
         body.push(CARRY, CARRY, MOVE, MOVE);
-        availableEnergy -=
-          parts["CARRY"] + parts["CARRY"] + parts["MOVE"] + parts["MOVE"];
+        availableEnergy -= parts["CARRY"] + parts["CARRY"] + parts["MOVE"] + parts["MOVE"];
         while (availableEnergy >= parts["CARRY"] + parts["MOVE"]) {
           body.unshift(CARRY);
           body.push(MOVE);
@@ -141,10 +139,7 @@ class SpawnController {
       case "upgrader":
         body.push(WORK, CARRY, MOVE);
         availableEnergy -= parts["WORK"] + parts["CARRY"] + parts["MOVE"];
-        while (
-          availableEnergy >=
-          parts["WORK"] + parts["CARRY"] + parts["MOVE"]
-        ) {
+        while (availableEnergy >= parts["WORK"] + parts["CARRY"] + parts["MOVE"]) {
           body.unshift(WORK);
           body.push(CARRY);
           body.push(MOVE);
@@ -154,10 +149,7 @@ class SpawnController {
       case "builder":
         body.push(WORK, CARRY, MOVE);
         availableEnergy -= parts["WORK"] + parts["CARRY"] + parts["MOVE"];
-        while (
-          availableEnergy >=
-          parts["WORK"] + parts["CARRY"] + parts["MOVE"]
-        ) {
+        while (availableEnergy >= parts["WORK"] + parts["CARRY"] + parts["MOVE"]) {
           body.unshift(WORK);
           body.push(CARRY);
           body.push(MOVE);
@@ -167,10 +159,7 @@ class SpawnController {
       case "repairer":
         body.push(WORK, CARRY, MOVE);
         availableEnergy -= parts["WORK"] + parts["CARRY"] + parts["MOVE"];
-        while (
-          availableEnergy >=
-          parts["WORK"] + parts["CARRY"] + parts["MOVE"]
-        ) {
+        while (availableEnergy >= parts["WORK"] + parts["CARRY"] + parts["MOVE"]) {
           body.unshift(WORK);
           body.push(CARRY);
           body.push(MOVE);

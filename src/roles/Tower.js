@@ -18,12 +18,14 @@ class Tower {
       this.tower.heal(friendlyTarget);
       return;
     }
-    // repair structures (not walls)
-    const structureTarget = this.tower.pos.findClosestByRange(FIND_STRUCTURES, {
-      filter: (structure) =>
-        structure.hits < structure.hitsMax &&
-        structure.structureType != STRUCTURE_WALL,
+    // repair targets within range of tower
+    const structureTargets = this.tower.room.find(FIND_STRUCTURES, {
+      filter: (structure) => structure.hits < structure.hitsMax && structure.hits < 150000 && structure.pos.getRangeTo(this.tower) < 20,
     });
+
+    // sort by hits
+    structureTargets.sort((a, b) => a.hits - b.hits);
+    const structureTarget = structureTargets[0];
     if (structureTarget) {
       this.tower.repair(structureTarget);
       return;
