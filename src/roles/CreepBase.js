@@ -2,12 +2,18 @@ class CreepBase {
   constructor(creep) {
     this.creep = creep;
   }
+  moveTo(
+    target,
+    options = {
+      visualizePathStyle: { stroke: "#ffffff" },
+      reusePath: 1,
+    }
+  ) {
+    this.creep.moveTo(target, options);
+  }
   addRoadSites() {
     // if current position doesn't have a road, create construction site
-    if (
-      this.creep.room.lookForAt(LOOK_STRUCTURES, this.creep.pos.x, this.creep.pos.y).length == 0 &&
-      this.creep.room.lookForAt(LOOK_CONSTRUCTION_SITES, this.creep.pos.x, this.creep.pos.y).length == 0
-    ) {
+    if (this.creep.room.lookForAt(LOOK_STRUCTURES, this.creep.pos.x, this.creep.pos.y).length == 0 && this.creep.room.lookForAt(LOOK_CONSTRUCTION_SITES, this.creep.pos.x, this.creep.pos.y).length == 0) {
       this.creep.room.createConstructionSite(this.creep.pos.x, this.creep.pos.y, STRUCTURE_ROAD);
     }
   }
@@ -72,11 +78,7 @@ class CreepBase {
     if (containers.length > 0) {
       const closestContainer = this.creep.pos.findClosestByPath(containers);
       if (this.creep.withdraw(closestContainer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-        this.creep.moveTo(closestContainer, {
-          visualizePathStyle: { stroke: "#ffaa00" },
-          //   ignoreCreeps: true,
-          reusePath: 1,
-        });
+        this.creep.moveTo(closestContainer);
         return true; // Exit early if we're moving to a container or storage
       }
     }
@@ -90,11 +92,7 @@ class CreepBase {
     if (containers.length > 0) {
       const closestContainer = this.creep.pos.findClosestByPath(containers);
       if (this.creep.transfer(closestContainer, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-        this.creep.moveTo(closestContainer, {
-          visualizePathStyle: { stroke: "#ffaa00" },
-          //   ignoreCreeps: true,
-          reusePath: 1,
-        });
+        this.creep.moveTo(closestContainer);
         return true; // Exit early if we're moving to a container or storage
       }
     }
@@ -110,11 +108,7 @@ class CreepBase {
 
     if (closestDroppedEnergy) {
       if (this.creep.pickup(closestDroppedEnergy) === ERR_NOT_IN_RANGE) {
-        this.creep.moveTo(closestDroppedEnergy, {
-          visualizePathStyle: { stroke: "#ffaa00" },
-          //   ignoreCreeps: true,
-          reusePath: 1,
-        });
+        this.creep.moveTo(closestDroppedEnergy);
       }
       return true;
     }
@@ -129,10 +123,7 @@ class CreepBase {
       // if creep has energy at all, then transfer, otherwise collect
       if (this.creep.store.getUsedCapacity() > 0) {
         if (this.creep.transfer(extensions[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-          this.creep.moveTo(extensions[0], {
-            visualizePathStyle: { stroke: "#ffaa00" },
-            reusePath: 1,
-          });
+          this.creep.moveTo(extensions[0]);
         }
       } else {
         const collectingFromContainers = this.collectFromContainers();
@@ -165,10 +156,7 @@ class CreepBase {
       // sort towers by energy level
       towers = towers.sort((a, b) => a.store.getFreeCapacity(RESOURCE_ENERGY) - b.store.getFreeCapacity(RESOURCE_ENERGY));
       if (this.creep.transfer(towers[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-        this.creep.moveTo(towers[0], {
-          visualizePathStyle: { stroke: "#ffaa00" },
-          reusePath: 1,
-        });
+        this.creep.moveTo(towers[0]);
         return true;
       }
     } else {

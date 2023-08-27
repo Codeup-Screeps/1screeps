@@ -20,8 +20,6 @@ class RoleHauler extends CreepBase {
       if (this.collectFromHarvester()) {
         return;
       }
-
-      this.collectFromHarvester();
     } else {
       // Find spawns in the room that aren't full
       const spawns = this.creep.room.find(FIND_MY_SPAWNS, {
@@ -34,10 +32,7 @@ class RoleHauler extends CreepBase {
         // Try to transfer energy to the spawn. If it's not in range
         if (this.creep.transfer(closestSpawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           // Move to it
-          this.creep.moveTo(closestSpawn, {
-            visualizePathStyle: { stroke: "#ffaa00" },
-            reusePath: 1,
-          });
+          this.creep.moveTo(closestSpawn);
         }
         return;
       }
@@ -52,10 +47,7 @@ class RoleHauler extends CreepBase {
         // Try to transfer energy to the extension. If it's not in range
         if (this.creep.transfer(closestExtension, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           // Move to it
-          this.creep.moveTo(closestExtension, {
-            visualizePathStyle: { stroke: "#ffaa00" },
-            reusePath: 1,
-          });
+          this.creep.moveTo(closestExtension);
         }
         return;
       }
@@ -67,10 +59,7 @@ class RoleHauler extends CreepBase {
         // Try to transfer energy to the tower. If it's not in range
         if (this.creep.transfer(towers[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           // Move to it
-          this.creep.moveTo(towers[0], {
-            visualizePathStyle: { stroke: "#ffaa00" },
-            reusePath: 1,
-          });
+          this.creep.moveTo(towers[0]);
         }
         return;
       }
@@ -85,10 +74,7 @@ class RoleHauler extends CreepBase {
         // Try to transfer energy to the container. If it's not in range
         if (this.creep.transfer(closestContainer, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           // Move to it
-          this.creep.moveTo(closestContainer, {
-            visualizePathStyle: { stroke: "#ffaa00" },
-            reusePath: 1,
-          });
+          this.creep.moveTo(closestContainer);
         }
         return;
       }
@@ -103,20 +89,14 @@ class RoleHauler extends CreepBase {
         // Try to transfer energy to the storage. If it's not in range
         if (this.creep.transfer(closestStorage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
           // Move to it
-          this.creep.moveTo(closestStorage, {
-            visualizePathStyle: { stroke: "#ffaa00" },
-            reusePath: 1,
-          });
+          this.creep.moveTo(closestStorage);
         }
         return;
       } else {
         // if no containers, move to spawn and drop energy
         const spawn = this.creep.pos.findClosestByRange(FIND_MY_SPAWNS);
         if (this.creep.transfer(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-          this.creep.moveTo(spawn, {
-            visualizePathStyle: { stroke: "#ffaa00" },
-            reusePath: 1,
-          });
+          this.creep.moveTo(spawn);
         } else {
           this.creep.drop(RESOURCE_ENERGY);
           // head back toward source and wait
@@ -146,10 +126,7 @@ class RoleHauler extends CreepBase {
       // try to pick it up
       if (this.creep.pickup(spawnDroppedEnergy[0]) == ERR_NOT_IN_RANGE) {
         // move to it
-        this.creep.moveTo(spawnDroppedEnergy[0], {
-          visualizePathStyle: { stroke: "#ffaa00" },
-          reusePath: 1,
-        });
+        this.creep.moveTo(spawnDroppedEnergy[0]);
         return true;
       }
       return true;
@@ -164,10 +141,7 @@ class RoleHauler extends CreepBase {
       // largest energy first
       droppedEnergy.sort((a, b) => b.amount - a.amount);
       if (this.creep.pickup(droppedEnergy[0]) == ERR_NOT_IN_RANGE) {
-        this.creep.moveTo(droppedEnergy[0], {
-          visualizePathStyle: { stroke: "#ffaa00" },
-          reusePath: 1,
-        });
+        this.creep.moveTo(droppedEnergy[0]);
       }
       return true;
     }

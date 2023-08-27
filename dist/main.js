@@ -533,9 +533,9 @@ class Builder extends CreepBase {
       if (this.transferEnergyToTowers()) {
         return;
       }
-      if (this.depositToContainer()) {
-        return;
-      }
+      //   if (this.depositToContainer()) {
+      //     return;
+      //   }
       //   if (this.transferEnergyToExtensions()) {
       //     return;
       //   }
