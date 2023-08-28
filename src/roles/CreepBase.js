@@ -122,10 +122,21 @@ class CreepBase {
       filter: (resource) => resource.resourceType == RESOURCE_ENERGY,
     });
     if (droppedEnergy.length > 0) {
-      // largest energy first
-      droppedEnergy.sort((a, b) => b.amount - a.amount);
-      if (this.creep.pickup(droppedEnergy[0]) == ERR_NOT_IN_RANGE) {
-        this.creep.moveTo(droppedEnergy[0]);
+      let target;
+      // closest energy first
+      let closestEnergy = this.creep.pos.findClosestByRange(droppedEnergy);
+      // if it is more than what the creep can carry
+      if (closestEnergy.amount > this.creep.store.getFreeCapacity()) {
+        // sort by largest energy first
+        droppedEnergy.sort((a, b) => b.amount - a.amount);
+        target = droppedEnergy[0];
+      } else {
+        // largest energy first
+        droppedEnergy.sort((a, b) => b.amount - a.amount);
+        target = droppedEnergy[0];
+      }
+      if (this.creep.pickup(target) == ERR_NOT_IN_RANGE) {
+        this.creep.moveTo(target);
       }
       return true;
     } else {
