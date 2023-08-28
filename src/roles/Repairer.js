@@ -7,23 +7,22 @@ class Repairer extends CreepBase {
   }
   run() {
     // Switching between modes
-    if (
-      this.creep.memory.repairing &&
-      this.creep.store[RESOURCE_ENERGY] === 0
-    ) {
+    if (this.creep.memory.repairing && this.creep.store[RESOURCE_ENERGY] === 0) {
       this.creep.memory.repairing = false;
       this.creep.say("🔄 collect");
     }
-    if (
-      !this.creep.memory.repairing &&
-      this.creep.store.getFreeCapacity() === 0
-    ) {
+    if (!this.creep.memory.repairing && this.creep.store.getFreeCapacity() === 0) {
       this.creep.memory.repairing = true;
       this.creep.say("🔧 repair");
     }
-
     if (this.creep.memory.repairing) {
-      this.performRepairRole();
+      if (this.performRepairRole()) {
+        return;
+      }
+      // If no repair sites, help build
+      if (this.performBuildRole()) {
+        return;
+      }
     } else {
       // Collecting logic
       // try to withdraw from containers or storage
@@ -31,7 +30,7 @@ class Repairer extends CreepBase {
         return;
       }
       // try to collect dropped energy
-      if (this.collectFromGround()) {
+      if (this.collectEnergyFromGround()) {
         return;
       }
     }

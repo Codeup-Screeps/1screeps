@@ -1,4 +1,5 @@
 import CreepsController from "./Creeps";
+import Architect from "./Architect";
 
 class SpawnController {
   constructor(spawn) {
@@ -16,11 +17,13 @@ class SpawnController {
     this.extensions = this.spawn.room.find(FIND_STRUCTURES, {
       filter: (structure) => structure.structureType == STRUCTURE_EXTENSION,
     }).length;
+    this.availableEnergy = parseFloat(this.spawn.room.energyAvailable);
+    this.maxEnergy = parseFloat(this.spawn.room.energyCapacityAvailable);
     // wait on energy to create larger creeps
-    this.minBuild = 300 + (50 * this.extensions) / 3;
+    this.minBuild = 300 + (50 * this.extensions) / 2.5;
     this.maxBuild = 300 + (50 * this.extensions) / 2;
     // in the case of a base meltdown, let spawn create smaller creeps
-    if (this.harvesters === 0 || this.haulers === 0) {
+    if (this.harvesters === 0 && this.haulers === 0) {
       this.minBuild = 300;
     }
     this.creepsController = new CreepsController(spawn);
@@ -28,7 +31,10 @@ class SpawnController {
   run() {
     this.spawnNewCreeps();
     this.announceNewCreeps();
+    this.manageSpawnEnergy();
     this.creepsController.run();
+    // console.log(this.spawn.room);
+    new Architect(this.spawn).run();
   }
   countCreeps(type) {
     return _.filter(Game.creeps, (creep) => creep.memory.role == type).length;
@@ -38,22 +44,22 @@ class SpawnController {
     if (this.minBuild > availableEnergy) {
       return;
     }
-    // If there aren't enough harvesters
-    if (this.harvesters < this.sourceCount) {
-      // Spawn a new one
-
-      var newName = "Harvester" + Game.time;
-      this.spawn.spawnCreep(this.creepLoadout("harvester"), newName, {
-        memory: { role: "harvester" },
-      });
-    }
-    // Otherwise if there aren't enough haulers
-    else if (this.haulers < 1) {
+    // hauler but only if there is at least one harvester
+    if (this.harvesters > 0 && this.haulers < 2) {
       // Spawn a new one
 
       var newName = "Hauler" + Game.time;
       this.spawn.spawnCreep(this.creepLoadout("hauler"), newName, {
         memory: { role: "hauler" },
+      });
+    }
+    // If there aren't enough harvesters
+    else if (this.harvesters < this.sourceCount) {
+      // Spawn a new one
+
+      var newName = "Harvester" + Game.time;
+      this.spawn.spawnCreep(this.creepLoadout("harvester"), newName, {
+        memory: { role: "harvester" },
       });
     }
     // Otherwise if there aren't enough builders
@@ -66,7 +72,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough repairers
-    else if (this.repairers < 1) {
+    else if (this.repairers < 1 && this.spawn.room.find(FIND_STRUCTURES, { filter: (structure) => structure.hits < structure.hitsMax }).length > 0) {
       // Spawn a new one
       var newName = "Repairer" + Game.time;
       this.spawn.spawnCreep(this.creepLoadout("repairer"), newName, {
@@ -170,6 +176,29 @@ class SpawnController {
     // const totalCost = body.reduce((total, part) => total + parts[part], 0);
     // console.log(`body: ${body}, totalCost: ${totalCost}`);
     return body;
+  }
+  manageSpawnEnergy() {
+    if (this.availableEnergy < this.maxEnergy) {
+      let assignedHauler = this.spawn.room.find(FIND_MY_CREEPS, {
+        filter: (creep) => creep.memory.refillSpawn == true,
+      });
+      if (assignedHauler.length == 0) {
+        // assign a hauler to refill spawn
+        let haulers = this.spawn.room.find(FIND_MY_CREEPS, {
+          filter: (creep) => creep.memory.role == "hauler",
+        });
+        if (haulers.length > 0) {
+          haulers[0].memory.refillSpawn = true;
+        }
+      }
+    } else {
+      let assignedHauler = this.spawn.room.find(FIND_MY_CREEPS, {
+        filter: (creep) => creep.memory.refillSpawn == true,
+      });
+      if (assignedHauler.length > 0) {
+        assignedHauler[0].memory.refillSpawn = false;
+      }
+    }
   }
 }
 

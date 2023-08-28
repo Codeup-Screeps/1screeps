@@ -1,0 +1,72 @@
+class Architect {
+  constructor(spawn) {
+    this.spawn = spawn;
+    this.room = spawn.room;
+    this.rcl = this.room.controller.level;
+  }
+  run() {
+    switch (this.rcl) {
+      case 1:
+        if (this.room.memory.bunkerPhase1 !== "done") {
+          this.bunkerPhase1();
+        }
+        break;
+      case 2:
+        if (this.room.memory.bunkerPhase2 !== "done") {
+          this.bunkerPhase2();
+        }
+        break;
+      default:
+        break;
+    }
+  }
+  bunkerPhase1() {
+    // create first line of roads in a square
+    this.room.createConstructionSite(this.spawn.pos.x, this.spawn.pos.y - 1, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.spawn.pos.x + 1, this.spawn.pos.y, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.spawn.pos.x + 2, this.spawn.pos.y + 1, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.spawn.pos.x + 3, this.spawn.pos.y + 2, STRUCTURE_ROAD);
+
+    // add container
+    this.room.createConstructionSite(this.spawn.pos.x + 2, this.spawn.pos.y + 2, STRUCTURE_CONTAINER);
+
+    // create second line of roads in a square
+    this.room.createConstructionSite(this.spawn.pos.x + 2, this.spawn.pos.y + 3, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.spawn.pos.x + 1, this.spawn.pos.y + 4, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.spawn.pos.x, this.spawn.pos.y + 5, STRUCTURE_ROAD);
+
+    // create third line of roads in a square
+    this.room.createConstructionSite(this.spawn.pos.x - 1, this.spawn.pos.y + 4, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.spawn.pos.x - 2, this.spawn.pos.y + 3, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.spawn.pos.x - 3, this.spawn.pos.y + 2, STRUCTURE_ROAD);
+
+    // create fourth line of roads in a square
+    this.room.createConstructionSite(this.spawn.pos.x - 2, this.spawn.pos.y + 1, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.spawn.pos.x - 1, this.spawn.pos.y, STRUCTURE_ROAD);
+    this.room.memory.bunkerPhase1 = "done";
+  }
+  bunkerPhase2() {
+    // build new box
+    this.room.createConstructionSite(this.spawn.pos.x + 1, this.spawn.pos.y - 2, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.spawn.pos.x + 2, this.spawn.pos.y - 3, STRUCTURE_ROAD);
+
+    // second line of roads
+    this.room.createConstructionSite(this.spawn.pos.x + 3, this.spawn.pos.y - 2, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.spawn.pos.x + 4, this.spawn.pos.y - 1, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.spawn.pos.x + 5, this.spawn.pos.y, STRUCTURE_ROAD);
+
+    // third line of roads
+    this.room.createConstructionSite(this.spawn.pos.x + 4, this.spawn.pos.y + 1, STRUCTURE_ROAD);
+
+    // add extensions
+    this.room.createConstructionSite(this.spawn.pos.x + 1, this.spawn.pos.y - 1, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.spawn.pos.x + 2, this.spawn.pos.y - 2, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.spawn.pos.x + 2, this.spawn.pos.y - 1, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.spawn.pos.x + 2, this.spawn.pos.y, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.spawn.pos.x + 3, this.spawn.pos.y - 1, STRUCTURE_EXTENSION);
+
+    this.room.memory.bunkerPhase2 = "done";
+  }
+}
+
+export default Architect;

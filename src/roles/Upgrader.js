@@ -21,9 +21,7 @@ class RoleUpgrader extends CreepBase {
       this.creep.memory.upgrading = true;
       this.creep.say("⚡ upgrade");
     }
-
     // This is having the creep operate based on the upgrading state
-
     // If the creep is upgrading
     if (this.creep.memory.upgrading) {
       // Move to and upgrade the controller
@@ -34,7 +32,7 @@ class RoleUpgrader extends CreepBase {
         return;
       }
       // try to collect dropped energy
-      if (this.collectFromGround()) {
+      if (this.collectEnergyFromGround()) {
         return;
       }
     }
