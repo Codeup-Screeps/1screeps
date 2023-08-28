@@ -1,5 +1,4 @@
 import CreepsController from "./Creeps";
-import Architect from "./Architect";
 
 class SpawnController {
   constructor(spawn) {
@@ -32,9 +31,6 @@ class SpawnController {
     this.spawnNewCreeps();
     this.announceNewCreeps();
     this.manageSpawnEnergy();
-    this.creepsController.run();
-    // console.log(this.spawn.room);
-    new Architect(this.spawn).run();
   }
   countCreeps(type) {
     return _.filter(Game.creeps, (creep) => creep.memory.role == type).length;

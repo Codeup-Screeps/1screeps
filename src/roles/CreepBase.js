@@ -71,16 +71,20 @@ class CreepBase {
     let targets = this.creep.room.find(FIND_CONSTRUCTION_SITES);
     // remove ramparts that have over 50k hits
     targets = targets.filter((target) => target.structureType !== STRUCTURE_RAMPART || target.hits < 50000);
-    // build extensions first
-    targets = targets.sort((a, b) => {
-      if (a.structureType === STRUCTURE_EXTENSION && b.structureType !== STRUCTURE_EXTENSION) {
-        return -1;
-      } else if (a.structureType !== STRUCTURE_EXTENSION && b.structureType === STRUCTURE_EXTENSION) {
-        return 1;
-      } else {
-        return 0;
+    // get extensions
+    const extensions = targets.filter((target) => target.structureType == STRUCTURE_EXTENSION);
+    // sort extensions by proximity to creep
+    extensions.sort((a, b) => this.creep.pos.getRangeTo(a) - this.creep.pos.getRangeTo(b));
+    if (extensions.length > 0) {
+      if (this.creep.build(extensions[0]) == ERR_NOT_IN_RANGE) {
+        this.creep.moveTo(extensions[0]);
+        return true;
       }
-    });
+    } else {
+      return false;
+    }
+    // sort targets by proximity to creep
+    targets.sort((a, b) => this.creep.pos.getRangeTo(a) - this.creep.pos.getRangeTo(b));
     if (targets.length > 0) {
       if (this.creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
         this.creep.moveTo(targets[0]);

@@ -28,6 +28,9 @@ class Builder extends CreepBase {
       if (this.transferEnergyToTowers()) {
         return;
       }
+      if (this.performUpgradeRole()) {
+        return;
+      }
     } else {
       // Collecting logic
       // try to collect extra energy from around spawn

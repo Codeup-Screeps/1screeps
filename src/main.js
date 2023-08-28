@@ -6,6 +6,8 @@ import RoleBuilder from "./roles/Builder";
 import RoleRepairer from "./roles/Repairer";
 import SpawnController from "./controllers/Spawn";
 import Tower from "./structures/Tower";
+import Architect from "./controllers/Architect";
+import Warlord from "./controllers/Warlord";
 
 function loop() {
   // Loop through each creep's name in Memory.creeps
@@ -23,6 +25,12 @@ function loop() {
   for (let spawn of spawns) {
     // Create a new Spawn object
     new SpawnController(spawn).run();
+  }
+  // Loop through rooms
+  for (let room of _.filter(Game.rooms, (room) => room.controller && room.controller.my)) {
+    // Create a new Architect object
+    new Architect(room).run();
+    new Warlord(room).run();
   }
 
   // Loop through creep's names in Game.creeps
