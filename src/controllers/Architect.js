@@ -117,11 +117,20 @@ class Architect {
     this.room.createConstructionSite(this.startSpawn.pos.x - 1, this.startSpawn.pos.y + 8, STRUCTURE_ROAD);
     this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y + 8, STRUCTURE_ROAD);
     this.room.createConstructionSite(this.startSpawn.pos.x + 1, this.startSpawn.pos.y + 8, STRUCTURE_ROAD);
+
+    // add last container
+    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y - 2, STRUCTURE_CONTAINER);
   }
   bunkerPhase3() {
     this.bunkerPhase2();
     // add a tower
     this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y + 1, STRUCTURE_TOWER);
+    // add extensions
+    this.room.createConstructionSite(this.startSpawn.pos.x - 1, this.startSpawn.pos.y - 1, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y - 2, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y - 1, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 3, this.startSpawn.pos.y - 1, STRUCTURE_EXTENSION);
   }
 }
 

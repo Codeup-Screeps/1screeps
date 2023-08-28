@@ -98,8 +98,8 @@ class SpawnController {
   creepLoadout(type) {
     let availableEnergy = parseFloat(this.spawn.room.energyAvailable);
     // control the size of harvesters based on available energy
-    console.log(`Building new ${type} screep.`);
-    console.log(`availableEnergy: ${availableEnergy}, minBuild: ${this.minBuild}, maxBuild: ${this.maxBuild}`);
+    // console.log(`Building new ${type} screep.`);
+    // console.log(`availableEnergy: ${availableEnergy}, minBuild: ${this.minBuild}, maxBuild: ${this.maxBuild}`);
     if (availableEnergy > this.maxEnergy) {
       availableEnergy = this.maxEnergy;
     }

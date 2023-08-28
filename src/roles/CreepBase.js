@@ -78,18 +78,16 @@ class CreepBase {
     if (extensions.length > 0) {
       if (this.creep.build(extensions[0]) == ERR_NOT_IN_RANGE) {
         this.creep.moveTo(extensions[0]);
-        return true;
       }
-    } else {
-      return false;
+      return true;
     }
     // sort targets by proximity to creep
     targets.sort((a, b) => this.creep.pos.getRangeTo(a) - this.creep.pos.getRangeTo(b));
     if (targets.length > 0) {
       if (this.creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
         this.creep.moveTo(targets[0]);
-        return true;
       }
+      return true;
     } else {
       return false;
     }
