@@ -120,18 +120,21 @@ class CreepBase {
     return false;
   }
   collectEnergyFromGround() {
-    const droppedEnergy = this.creep.room.find(FIND_DROPPED_RESOURCES, {
+    let droppedEnergy = this.creep.room.find(FIND_DROPPED_RESOURCES, {
       filter: (resource) => resource.resourceType == RESOURCE_ENERGY,
     });
     if (droppedEnergy.length > 0) {
       let target;
+      // if creep.memory.role == "hauler", filter out dropped energy that is within 1 range of the spawn
+      if (this.creep.memory.role == "hauler") {
+        const spawn = this.creep.pos.findClosestByRange(FIND_MY_SPAWNS);
+        droppedEnergy = droppedEnergy.filter((resource) => spawn.pos.getRangeTo(resource) > 1);
+      }
       // closest energy first
       let closestEnergy = this.creep.pos.findClosestByRange(droppedEnergy);
       // if it is more than what the creep can carry
       if (closestEnergy.amount > this.creep.store.getFreeCapacity()) {
-        // sort by largest energy first
-        droppedEnergy.sort((a, b) => b.amount - a.amount);
-        target = droppedEnergy[0];
+        target = closestEnergy;
       } else {
         // largest energy first
         droppedEnergy.sort((a, b) => b.amount - a.amount);
