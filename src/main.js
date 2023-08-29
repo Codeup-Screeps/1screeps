@@ -8,17 +8,12 @@ import SpawnController from "./controllers/Spawn";
 import Tower from "./structures/Tower";
 import Architect from "./controllers/Architect";
 import Warlord from "./controllers/Warlord";
+import CreepsController from "./controllers/Creeps";
+import clearMemory from "./utils/clearMemory";
 
 function loop() {
-  // Loop through each creep's name in Memory.creeps
-  for (var creepName in Memory.creeps) {
-    // If the creep's name isn't in Game.creeps
-    if (!Game.creeps[creepName]) {
-      // Remove it from the memory and log that it did so
-      delete Memory.creeps[creepName];
-      // console.log("Clearing non-existing creep memory:", creepName);
-    }
-  }
+  // Clear memory
+  clearMemory();
   // Get spawns
   const spawns = _.filter(Game.spawns, (spawn) => spawn.my);
   // Loop through spawns
@@ -26,11 +21,15 @@ function loop() {
     // Create a new Spawn object
     new SpawnController(spawn).run();
   }
-  // Loop through rooms
-  for (let room of _.filter(Game.rooms, (room) => room.controller && room.controller.my)) {
-    // Create a new Architect object
-    new Architect(room).run();
-    new Warlord(room).run();
+  const rooms = _.filter(Game.rooms, (room) => room.controller && room.controller.my);
+  if (rooms.length > 0) {
+    // Loop through rooms
+    for (let room of rooms) {
+      // Create a new Architect object
+      new CreepsController(room).run();
+      new Architect(room).run();
+      new Warlord(room).run();
+    }
   }
 
   // Loop through creep's names in Game.creeps

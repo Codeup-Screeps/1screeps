@@ -20,7 +20,7 @@ class RoleHauler extends CreepBase {
           return;
         }
       }
-      if (this.collectEnergyFromGround()) {
+      if (this.collectEnergyFromGround(this.creep.memory.source)) {
         return;
       }
     } else {

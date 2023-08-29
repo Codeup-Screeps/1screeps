@@ -20,12 +20,11 @@ class SpawnController {
     this.maxEnergy = parseFloat(this.spawn.room.energyCapacityAvailable);
     // wait on energy to create larger creeps
     this.minBuild = 300 + (50 * this.extensions) / 2.5;
-    this.maxBuild = 300 + (50 * this.extensions) / 2;
+    this.maxBuild = 300 + (50 * this.extensions) / 1;
     // in the case of a base meltdown, let spawn create smaller creeps
     if (this.harvesters === 0 && this.haulers === 0) {
       this.minBuild = 300;
     }
-    this.creepsController = new CreepsController(spawn);
   }
   run() {
     this.spawnNewCreeps();

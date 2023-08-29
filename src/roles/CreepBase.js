@@ -129,17 +129,15 @@ class CreepBase {
     }
     return false;
   }
-  collectEnergyFromGround() {
+  collectEnergyFromGround(source) {
     let droppedEnergy = this.creep.room.find(FIND_DROPPED_RESOURCES, {
       filter: (resource) => resource.resourceType == RESOURCE_ENERGY,
     });
+    if (source) {
+      droppedEnergy = droppedEnergy.filter((resource) => resource.pos.findInRange(FIND_SOURCES, 1, { filter: { id: source } }).length > 0);
+    }
     if (droppedEnergy.length > 0) {
       let target;
-      // if creep.memory.role == "hauler", filter out dropped energy that is within 1 range of the spawn
-      if (this.creep.memory.role == "hauler") {
-        const spawn = this.creep.pos.findClosestByRange(FIND_MY_SPAWNS);
-        droppedEnergy = droppedEnergy.filter((resource) => spawn.pos.getRangeTo(resource) > 1);
-      }
       // if a "builder" or "repairer", only get dropped energy that is within 3 range of the spawn
       if (this.creep.memory.role == "builder" || this.creep.memory.role == "repairer" || this.creep.memory.role == "upgrader") {
         const spawn = this.creep.pos.findClosestByRange(FIND_MY_SPAWNS);
