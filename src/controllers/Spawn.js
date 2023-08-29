@@ -59,7 +59,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough builders
-    else if (this.builders < 1) {
+    else if (this.builders < 2) {
       // Spawn a new one
 
       var newName = "Builder" + Game.time;
@@ -68,7 +68,7 @@ class SpawnController {
       });
     }
     // Otherwise if there aren't enough repairers
-    else if (this.repairers < 1 && this.spawn.room.find(FIND_STRUCTURES, { filter: (structure) => structure.hits < structure.hitsMax }).length > 0) {
+    else if (this.repairers < 1) {
       // Spawn a new one
       var newName = "Repairer" + Game.time;
       this.spawn.spawnCreep(this.creepLoadout("repairer"), newName, {

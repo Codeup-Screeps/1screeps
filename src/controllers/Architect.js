@@ -4,7 +4,7 @@ class Architect {
     // startSpawn is the first spawn in the room
     this.startSpawn = this.room.find(FIND_MY_SPAWNS)[0];
     this.rcl = this.room.controller.level;
-    this.bunkerExits = [];
+    this.bunkerExits = [new RoomPosition(this.startSpawn.pos.x, this.startSpawn.pos.y - 6, this.room.name), new RoomPosition(this.startSpawn.pos.x - 8, this.startSpawn.pos.y + 2, this.room.name), new RoomPosition(this.startSpawn.pos.x + 8, this.startSpawn.pos.y + 2, this.room.name), new RoomPosition(this.startSpawn.pos.x, this.startSpawn.pos.y + 10, this.room.name)];
   }
   run() {
     if (!this.room.memory.bunker) {
@@ -37,9 +37,6 @@ class Architect {
     this.room.createConstructionSite(this.startSpawn.pos.x + 2, this.startSpawn.pos.y + 1, STRUCTURE_ROAD);
     this.room.createConstructionSite(this.startSpawn.pos.x + 3, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
 
-    // add container
-    this.room.createConstructionSite(this.startSpawn.pos.x + 2, this.startSpawn.pos.y + 2, STRUCTURE_CONTAINER);
-
     // create second line of roads in a square
     this.room.createConstructionSite(this.startSpawn.pos.x + 2, this.startSpawn.pos.y + 3, STRUCTURE_ROAD);
     this.room.createConstructionSite(this.startSpawn.pos.x + 1, this.startSpawn.pos.y + 4, STRUCTURE_ROAD);
@@ -54,6 +51,36 @@ class Architect {
     this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y + 1, STRUCTURE_ROAD);
     this.room.createConstructionSite(this.startSpawn.pos.x - 1, this.startSpawn.pos.y, STRUCTURE_ROAD);
 
+    // north road connector
+    this.room.createConstructionSite(this.startSpawn.pos.x - 1, this.startSpawn.pos.y - 4, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y - 4, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x + 1, this.startSpawn.pos.y - 4, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y - 5, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y - 6, STRUCTURE_ROAD);
+
+    // west road connector
+    this.room.createConstructionSite(this.startSpawn.pos.x - 6, this.startSpawn.pos.y + 3, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 6, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 6, this.startSpawn.pos.y + 1, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 7, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 8, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
+
+    // east road connector
+    this.room.createConstructionSite(this.startSpawn.pos.x + 6, this.startSpawn.pos.y + 1, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x + 6, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x + 6, this.startSpawn.pos.y + 3, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x + 7, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x + 8, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
+
+    // south road connector
+    this.room.createConstructionSite(this.startSpawn.pos.x - 1, this.startSpawn.pos.y + 8, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y + 8, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x + 1, this.startSpawn.pos.y + 8, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y + 9, STRUCTURE_ROAD);
+    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y + 10, STRUCTURE_ROAD);
+
+    this.buildRoadsToSources();
+    this.buildRoadToRC();
     // store in memory that phase 1 is complete
     this.room.memory.bunker.phase1 = true;
   }
@@ -80,6 +107,7 @@ class Architect {
     // add container
     this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y + 2, STRUCTURE_CONTAINER);
     this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y + 4, STRUCTURE_CONTAINER);
+    this.room.createConstructionSite(this.startSpawn.pos.x + 2, this.startSpawn.pos.y + 2, STRUCTURE_CONTAINER);
 
     // add roads for inner box for faster travel between extensions
     this.room.createConstructionSite(this.startSpawn.pos.x - 1, this.startSpawn.pos.y + 3, STRUCTURE_ROAD);
@@ -93,6 +121,25 @@ class Architect {
     this.room.createConstructionSite(this.startSpawn.pos.x - 3, this.startSpawn.pos.y + 6, STRUCTURE_ROAD);
     this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y + 7, STRUCTURE_ROAD);
     this.room.createConstructionSite(this.startSpawn.pos.x - 1, this.startSpawn.pos.y + 6, STRUCTURE_ROAD);
+
+    // add last container
+    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y - 2, STRUCTURE_CONTAINER);
+
+    // build roads to sources
+    this.buildRoadToRC();
+    this.buildRoadsToSources();
+    // store in memory that phase 2 is complete
+    this.room.memory.bunker.phase2 = true;
+  }
+  bunkerPhase3() {
+    // add a tower
+    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y + 1, STRUCTURE_TOWER);
+    // add extensions
+    this.room.createConstructionSite(this.startSpawn.pos.x - 1, this.startSpawn.pos.y - 1, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y - 2, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y - 1, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 3, this.startSpawn.pos.y - 1, STRUCTURE_EXTENSION);
 
     // third extension box
     this.room.createConstructionSite(this.startSpawn.pos.x - 1, this.startSpawn.pos.y - 2, STRUCTURE_ROAD);
@@ -109,62 +156,6 @@ class Architect {
     this.room.createConstructionSite(this.startSpawn.pos.x + 3, this.startSpawn.pos.y + 6, STRUCTURE_ROAD);
     this.room.createConstructionSite(this.startSpawn.pos.x + 2, this.startSpawn.pos.y + 7, STRUCTURE_ROAD);
     this.room.createConstructionSite(this.startSpawn.pos.x + 1, this.startSpawn.pos.y + 6, STRUCTURE_ROAD);
-
-    // north road connector
-    this.room.createConstructionSite(this.startSpawn.pos.x - 1, this.startSpawn.pos.y - 4, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y - 4, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x + 1, this.startSpawn.pos.y - 4, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y - 5, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y - 6, STRUCTURE_ROAD);
-    // add this point as a bunker exit point
-    this.bunkerExits.push(new RoomPosition(this.startSpawn.pos.x, this.startSpawn.pos.y - 6, this.room.name));
-
-    // west road connector
-    this.room.createConstructionSite(this.startSpawn.pos.x - 6, this.startSpawn.pos.y + 3, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x - 6, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x - 6, this.startSpawn.pos.y + 1, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x - 7, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x - 8, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
-    // add this point as a bunker exit point
-    this.bunkerExits.push(new RoomPosition(this.startSpawn.pos.x - 8, this.startSpawn.pos.y + 2, this.room.name));
-
-    // east road connector
-    this.room.createConstructionSite(this.startSpawn.pos.x + 6, this.startSpawn.pos.y + 1, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x + 6, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x + 6, this.startSpawn.pos.y + 3, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x + 7, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x + 8, this.startSpawn.pos.y + 2, STRUCTURE_ROAD);
-    // add this point as a bunker exit point
-    this.bunkerExits.push(new RoomPosition(this.startSpawn.pos.x + 8, this.startSpawn.pos.y + 2, this.room.name));
-
-    // south road connector
-    this.room.createConstructionSite(this.startSpawn.pos.x - 1, this.startSpawn.pos.y + 8, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y + 8, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x + 1, this.startSpawn.pos.y + 8, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y + 9, STRUCTURE_ROAD);
-    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y + 10, STRUCTURE_ROAD);
-    // add this point as a bunker exit point
-    this.bunkerExits.push(new RoomPosition(this.startSpawn.pos.x, this.startSpawn.pos.y + 10, this.room.name));
-
-    // add last container
-    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y - 2, STRUCTURE_CONTAINER);
-
-    // build roads to sources
-    this.buildRoadsToSources();
-    this.buildRoadToRC();
-
-    // store in memory that phase 2 is complete
-    this.room.memory.bunker.phase2 = true;
-  }
-  bunkerPhase3() {
-    // add a tower
-    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y + 1, STRUCTURE_TOWER);
-    // add extensions
-    this.room.createConstructionSite(this.startSpawn.pos.x - 1, this.startSpawn.pos.y - 1, STRUCTURE_EXTENSION);
-    this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y - 2, STRUCTURE_EXTENSION);
-    this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y - 1, STRUCTURE_EXTENSION);
-    this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y, STRUCTURE_EXTENSION);
-    this.room.createConstructionSite(this.startSpawn.pos.x - 3, this.startSpawn.pos.y - 1, STRUCTURE_EXTENSION);
 
     // store in memory that phase 3 is complete
     this.room.memory.bunker.phase3 = true;
@@ -185,13 +176,13 @@ class Architect {
   determineBestBunkerExit(destination) {
     // find the bunker exit with least cost from the PathFinder object
     let bestExit = this.bunkerExits.reduce((min, exit) => {
-      let path = PathFinder.search(exit, destination);
+      let path = PathFinder.search(exit, destination, { plainCost: 2, swampCost: 3 });
       if (path.cost < min.cost) {
         return path;
       } else {
         return min;
       }
-    }, PathFinder.search(this.bunkerExits[0], destination, { plainCost: 1, swampCost: 1 }));
+    }, PathFinder.search(this.bunkerExits[0], destination, { plainCost: 2, swampCost: 3 }));
     return bestExit;
   }
   buildRoadAlongPath(path) {

@@ -81,6 +81,16 @@ class CreepBase {
       }
       return true;
     }
+    // get containers
+    const containers = targets.filter((target) => target.structureType == STRUCTURE_CONTAINER);
+    // sort containers by proximity to creep
+    containers.sort((a, b) => this.creep.pos.getRangeTo(a) - this.creep.pos.getRangeTo(b));
+    if (containers.length > 0) {
+      if (this.creep.build(containers[0]) == ERR_NOT_IN_RANGE) {
+        this.creep.moveTo(containers[0]);
+      }
+      return true;
+    }
     // sort targets by proximity to creep
     targets.sort((a, b) => this.creep.pos.getRangeTo(a) - this.creep.pos.getRangeTo(b));
     if (targets.length > 0) {
@@ -130,20 +140,29 @@ class CreepBase {
         const spawn = this.creep.pos.findClosestByRange(FIND_MY_SPAWNS);
         droppedEnergy = droppedEnergy.filter((resource) => spawn.pos.getRangeTo(resource) > 1);
       }
-      // closest energy first
-      let closestEnergy = this.creep.pos.findClosestByRange(droppedEnergy);
-      // if it is more than what the creep can carry
-      if (closestEnergy.amount > this.creep.store.getFreeCapacity()) {
-        target = closestEnergy;
+      // if a "builder" or "repairer", only get dropped energy that is within 3 range of the spawn
+      if (this.creep.memory.role == "builder" || this.creep.memory.role == "repairer" || this.creep.memory.role == "upgrader") {
+        const spawn = this.creep.pos.findClosestByRange(FIND_MY_SPAWNS);
+        droppedEnergy = droppedEnergy.filter((resource) => spawn.pos.getRangeTo(resource) < 3);
+      }
+      if (droppedEnergy.length > 0) {
+        // closest energy first
+        let closestEnergy = this.creep.pos.findClosestByRange(droppedEnergy);
+        // if it is more than what the creep can carry
+        if (closestEnergy.amount > this.creep.store.getFreeCapacity()) {
+          target = closestEnergy;
+        } else {
+          // largest energy first
+          droppedEnergy.sort((a, b) => b.amount - a.amount);
+          target = droppedEnergy[0];
+        }
+        if (this.creep.pickup(target) == ERR_NOT_IN_RANGE) {
+          this.creep.moveTo(target);
+        }
+        return true;
       } else {
-        // largest energy first
-        droppedEnergy.sort((a, b) => b.amount - a.amount);
-        target = droppedEnergy[0];
+        return false;
       }
-      if (this.creep.pickup(target) == ERR_NOT_IN_RANGE) {
-        this.creep.moveTo(target);
-      }
-      return true;
     } else {
       return false;
     }
