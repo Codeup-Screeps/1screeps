@@ -19,7 +19,7 @@ class SpawnController {
     this.availableEnergy = parseFloat(this.spawn.room.energyAvailable);
     this.maxEnergy = parseFloat(this.spawn.room.energyCapacityAvailable);
     // wait on energy to create larger creeps
-    this.minBuild = 300 + (50 * this.extensions) / 2.5;
+    this.minBuild = 300 + (50 * this.extensions) / 1.5;
     this.maxBuild = 300 + (50 * this.extensions) / 1;
     // in the case of a base meltdown, let spawn create smaller creeps
     if (this.harvesters === 0 && this.haulers === 0) {
@@ -42,7 +42,6 @@ class SpawnController {
     // hauler but only if there is at least one harvester
     if (this.harvesters > 0 && this.haulers < 2) {
       // Spawn a new one
-
       var newName = "Hauler" + Game.time;
       this.spawn.spawnCreep(this.creepLoadout("hauler"), newName, {
         memory: { role: "hauler" },
@@ -50,8 +49,10 @@ class SpawnController {
     }
     // If there aren't enough harvesters
     else if (this.harvesters < this.sourceCount) {
+      // harvesters have diminishing returns on their size
+      // testing maxBuild of 600
+      this.maxBuild = 750;
       // Spawn a new one
-
       var newName = "Harvester" + Game.time;
       this.spawn.spawnCreep(this.creepLoadout("harvester"), newName, {
         memory: { role: "harvester" },
@@ -99,8 +100,8 @@ class SpawnController {
     // control the size of harvesters based on available energy
     // console.log(`Building new ${type} screep.`);
     // console.log(`availableEnergy: ${availableEnergy}, minBuild: ${this.minBuild}, maxBuild: ${this.maxBuild}`);
-    if (availableEnergy > this.maxEnergy) {
-      availableEnergy = this.maxEnergy;
+    if (availableEnergy > this.maxBuild) {
+      availableEnergy = this.maxBuild;
     }
     const parts = {
       MOVE: 50,

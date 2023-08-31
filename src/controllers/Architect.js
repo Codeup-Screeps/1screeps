@@ -10,6 +10,14 @@ class Architect {
     if (!this.room.memory.bunker) {
       this.room.memory.bunker = {};
     }
+    // incremental bunker building
+    this.bunkerBuilder();
+    // rebuild broken roads every 500 ticks
+    this.rebuildRoads();
+    // keep container beside room controller
+    this.roomControllerContainer();
+  }
+  bunkerBuilder() {
     switch (this.rcl) {
       case 1:
         if (!this.room.memory.bunker.phase1) {
@@ -24,6 +32,11 @@ class Architect {
       case 3:
         if (!this.room.memory.bunker.phase3) {
           this.bunkerPhase3();
+        }
+        break;
+      case 4:
+        if (!this.room.memory.bunker.phase4) {
+          this.bunkerPhase4();
         }
         break;
       default:
@@ -160,6 +173,24 @@ class Architect {
     // store in memory that phase 3 is complete
     this.room.memory.bunker.phase3 = true;
   }
+  bunkerPhase4() {
+    this.room.createConstructionSite(this.startSpawn.pos.x - 3, this.startSpawn.pos.y, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 4, this.startSpawn.pos.y, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 3, this.startSpawn.pos.y + 1, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x + 3, this.startSpawn.pos.y, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x + 4, this.startSpawn.pos.y, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x + 3, this.startSpawn.pos.y + 1, STRUCTURE_EXTENSION);
+
+    this.room.createConstructionSite(this.startSpawn.pos.x - 3, this.startSpawn.pos.y + 3, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 4, this.startSpawn.pos.y + 4, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 3, this.startSpawn.pos.y + 4, STRUCTURE_EXTENSION);
+    this.room.createConstructionSite(this.startSpawn.pos.x - 2, this.startSpawn.pos.y + 4, STRUCTURE_EXTENSION);
+
+    // create storage
+    this.room.createConstructionSite(this.startSpawn.pos.x, this.startSpawn.pos.y + 3, STRUCTURE_STORAGE);
+
+    this.room.memory.bunker.phase4 = true;
+  }
   buildRoadsToSources() {
     // build roads to sources
     const sources = this.room.find(FIND_SOURCES);
@@ -188,6 +219,36 @@ class Architect {
   buildRoadAlongPath(path) {
     for (let pos of path.path) {
       this.room.createConstructionSite(pos.x, pos.y, STRUCTURE_ROAD);
+    }
+  }
+  rebuildRoads() {
+    // rebuild broken roads every 500 ticks
+    if (Game.time % 500 === 0) {
+      this.buildRoadsToSources();
+      this.buildRoadToRC();
+    }
+  }
+  roomControllerContainer() {
+    // save cpu by only running this every 1000 ticks
+    if (Game.time % 1000 === 0 && this.rcl >= 2) {
+      // keep container beside room controller
+      if (!this.room.controller) {
+        return;
+      }
+      if (this.room.controller.pos.findInRange(FIND_STRUCTURES, 6, { filter: (s) => s.structureType == STRUCTURE_CONTAINER }).length > 0) {
+        return;
+      }
+      // find open space beside controller. requirements: within 3 spaces of controller, not on a wall, not on a road
+      const roadPos = this.room.controller.pos.findInRange(FIND_STRUCTURES, 4, {
+        filter: (s) => s.structureType == STRUCTURE_ROAD,
+      });
+      // find an open plain or swamp tile beside roadPos
+      const openPositions = this.room.lookForAtArea(LOOK_TERRAIN, roadPos[0].pos.y - 1, roadPos[0].pos.x - 1, roadPos[0].pos.y + 1, roadPos[0].pos.x + 1, true).filter((t) => t.terrain != "wall" && t.terrain != "road");
+      if (openPositions.length === 0) {
+        return;
+      }
+      // create container
+      this.room.createConstructionSite(openPositions[0].x, openPositions[0].y, STRUCTURE_CONTAINER);
     }
   }
 }

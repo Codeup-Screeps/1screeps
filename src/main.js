@@ -4,6 +4,7 @@ import RoleUpgrader from "./roles/Upgrader";
 import RoleHauler from "./roles/Hauler";
 import RoleBuilder from "./roles/Builder";
 import RoleRepairer from "./roles/Repairer";
+import RolePawn from "./roles/Pawn";
 import SpawnController from "./controllers/Spawn";
 import Tower from "./structures/Tower";
 import Architect from "./controllers/Architect";
@@ -58,6 +59,10 @@ function loop() {
 
     if (creep.memory.role == "repairer") {
       new RoleRepairer(creep).run();
+      continue;
+    }
+    if (creep.memory.role == "pawn") {
+      new RolePawn(creep).run();
       continue;
     }
   }

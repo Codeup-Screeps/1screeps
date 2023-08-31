@@ -20,22 +20,12 @@ class CreepBase {
   performUpgradeRole() {
     if (this.creep.upgradeController(this.creep.room.controller) == ERR_NOT_IN_RANGE) {
       // Move to it
-      this.creep.moveTo(this.creep.room.controller, {
-        visualizePathStyle: { stroke: "#ffffff" },
-        // ignoreCreeps: true,
-        reusePath: 1,
-      });
+      this.creep.moveTo(this.creep.room.controller);
+      return true;
     } else {
       // check if there are screeps behind it
-      const behind = this.creep.pos.findInRange(FIND_MY_CREEPS, 1);
-      // if there are, move closer to the controller to give them room
-      if (behind.length > 0) {
-        this.creep.moveTo(this.creep.room.controller, {
-          visualizePathStyle: { stroke: "#ffffff" },
-          //   ignoreCreeps: true,
-          reusePath: 1,
-        });
-      }
+      this.moveOffRoad();
+      return false;
     }
   }
   performRepairRole() {
@@ -73,26 +63,18 @@ class CreepBase {
     targets = targets.filter((target) => target.structureType !== STRUCTURE_RAMPART || target.hits < 50000);
     // get extensions
     const extensions = targets.filter((target) => target.structureType == STRUCTURE_EXTENSION);
-    // sort extensions by proximity to creep
-    extensions.sort((a, b) => this.creep.pos.getRangeTo(a) - this.creep.pos.getRangeTo(b));
+    // sort extensions by proximity to creep and progress remaining
+    extensions.sort((a, b) => this.creep.pos.getRangeTo(a) - this.creep.pos.getRangeTo(b) + (a.progressTotal - a.progress) - (b.progressTotal - b.progress));
     if (extensions.length > 0) {
       if (this.creep.build(extensions[0]) == ERR_NOT_IN_RANGE) {
         this.creep.moveTo(extensions[0]);
       }
       return true;
     }
-    // get containers
-    const containers = targets.filter((target) => target.structureType == STRUCTURE_CONTAINER);
-    // sort containers by proximity to creep
-    containers.sort((a, b) => this.creep.pos.getRangeTo(a) - this.creep.pos.getRangeTo(b));
-    if (containers.length > 0) {
-      if (this.creep.build(containers[0]) == ERR_NOT_IN_RANGE) {
-        this.creep.moveTo(containers[0]);
-      }
-      return true;
-    }
-    // sort targets by proximity to creep
-    targets.sort((a, b) => this.creep.pos.getRangeTo(a) - this.creep.pos.getRangeTo(b));
+    // sort targets by combination of proximity to creep and progress remaining
+    targets.sort((a, b) => {
+      return this.creep.pos.getRangeTo(a) - this.creep.pos.getRangeTo(b) + (a.progressTotal - a.progress) - (b.progressTotal - b.progress);
+    });
     if (targets.length > 0) {
       if (this.creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
         this.creep.moveTo(targets[0]);
@@ -161,21 +143,6 @@ class CreepBase {
       } else {
         return false;
       }
-    } else {
-      return false;
-    }
-  }
-  collectExtraEnergy() {
-    // try to collect extra energy from around spawn
-    const spawn = this.creep.pos.findClosestByRange(FIND_MY_SPAWNS);
-    const droppedEnergy = spawn.pos.findInRange(FIND_DROPPED_RESOURCES, 1, {
-      filter: (resource) => resource.resourceType == RESOURCE_ENERGY,
-    });
-    if (droppedEnergy.length > 0) {
-      if (this.creep.pickup(droppedEnergy[0]) == ERR_NOT_IN_RANGE) {
-        this.creep.moveTo(droppedEnergy[0]);
-      }
-      return true;
     } else {
       return false;
     }
@@ -274,7 +241,7 @@ class CreepBase {
   transferEnergyToTowers() {
     // assist haulers by transferring energy from containers to towers
     let towers = this.creep.room.find(FIND_STRUCTURES, {
-      filter: (structure) => structure.structureType == STRUCTURE_TOWER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
+      filter: (structure) => structure.structureType == STRUCTURE_TOWER && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 200,
     });
     if (towers.length > 0) {
       // if creep has capacity, collect from containers
@@ -297,6 +264,47 @@ class CreepBase {
     } else {
       return false;
     }
+  }
+  moveOffRoad() {
+    // if current position is a road
+    if (this.creep.room.lookForAt(LOOK_STRUCTURES, this.creep.pos.x, this.creep.pos.y).length > 0 && this.creep.room.lookForAt(LOOK_STRUCTURES, this.creep.pos.x, this.creep.pos.y)[0].structureType == STRUCTURE_ROAD) {
+      return;
+    }
+    // method to have creep move to the nearest open tile that's not a road
+    const creep = this.creep;
+    const creepPos = creep.pos;
+    const terrain = creep.room.getTerrain();
+    const x = creepPos.x;
+    const y = creepPos.y;
+    const terrainAtPos = terrain.get(x, y);
+    const terrainAtPosLeft = terrain.get(x - 1, y);
+    const terrainAtPosRight = terrain.get(x + 1, y);
+    const terrainAtPosTop = terrain.get(x, y - 1);
+    const terrainAtPosBottom = terrain.get(x, y + 1);
+    const terrainLeft = terrain.get(x - 1, y);
+    const terrainRight = terrain.get(x + 1, y);
+    const terrainTop = terrain.get(x, y - 1);
+    const terrainBottom = terrain.get(x, y + 1);
+    const terrainTopLeft = terrain.get(x - 1, y - 1);
+    const terrainTopRight = terrain.get(x + 1, y - 1);
+    const terrainBottomLeft = terrain.get(x - 1, y + 1);
+    const terrainBottomRight = terrain.get(x + 1, y + 1);
+    let terrainArray = [terrainAtPos, terrainAtPosLeft, terrainAtPosRight, terrainAtPosTop, terrainAtPosBottom, terrainLeft, terrainRight, terrainTop, terrainBottom, terrainTopLeft, terrainTopRight, terrainBottomLeft, terrainBottomRight];
+    // remove any impassable terrain from array
+    terrainArray = terrainArray.filter((t) => t !== TERRAIN_MASK_WALL);
+    // remove any structures from array
+    const structures = creep.room.lookForAt(LOOK_STRUCTURES, creepPos);
+    if (structures.length > 0) {
+      terrainArray = terrainArray.filter((t) => t !== structures[0].structureType);
+    }
+    // remove any creeps from array
+    const creeps = creep.room.lookForAt(LOOK_CREEPS, creepPos);
+    if (creeps.length > 0) {
+      terrainArray = terrainArray.filter((t) => t !== LOOK_CREEPS);
+    }
+    // remove any terrain that is not plain
+    terrainArray = terrainArray.filter((t) => t !== TERRAIN_MASK_SWAMP);
+    this.creep.move(this.creep.pos.getDirectionTo(terrainArray[0]));
   }
 }
 

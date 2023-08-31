@@ -31,20 +31,18 @@ class Builder extends CreepBase {
       if (this.performUpgradeRole()) {
         return;
       }
+      this.moveOffRoad();
     } else {
       // Collecting logic
       // try to collect extra energy from around spawn
-      if (this.collectExtraEnergy()) {
+      if (this.collectEnergyFromGround()) {
         return;
       }
       // try to withdraw from containers or storage
       if (this.collectFromContainers()) {
         return;
       }
-      // try to collect dropped energy
-      if (this.collectEnergyFromGround()) {
-        return;
-      }
+      this.moveOffRoad();
     }
   }
 }

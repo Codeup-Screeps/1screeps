@@ -35,6 +35,7 @@ class RoleUpgrader extends CreepBase {
       if (this.collectEnergyFromGround()) {
         return;
       }
+      this.moveOffRoad();
     }
   }
 }
